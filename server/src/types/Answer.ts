@@ -8,7 +8,7 @@ export class Answer {
     private readonly content: String;
 
     public static clone(otherAnswer: Answer) {
-        return new Answer(otherAnswer.id, otherAnswer.questionMetadata, otherAnswer.answeredBy, otherAnswer.content)
+        return new Answer(otherAnswer.id, QuestionMetadata.clone(otherAnswer.questionMetadata), User.clone(otherAnswer.answeredBy), otherAnswer.content)
     }
 
     constructor(id: String, questionMetadata: QuestionMetadata, answeredBy: User, content: String) {

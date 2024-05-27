@@ -4,7 +4,8 @@ import {Answer} from "./Answer";
 export class Question {
 
     public static clone(otherQuestion: Question) {
-        return new Question(otherQuestion.questionMetadata, otherQuestion.content, otherQuestion.answers);
+        const otherAnswers = otherQuestion.answers || [];
+        return new Question(QuestionMetadata.clone(otherQuestion.questionMetadata), otherQuestion.content, otherAnswers.map(a => Answer.clone(a)));
     }
 
     private readonly questionMetadata: QuestionMetadata;

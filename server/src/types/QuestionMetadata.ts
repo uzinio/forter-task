@@ -4,6 +4,11 @@ export class QuestionMetadata {
     private readonly id: string;
     private readonly askedBy: User;
 
+    public static clone(otherQuestionMetadata: QuestionMetadata) {
+        console.log(otherQuestionMetadata);
+        return new QuestionMetadata(otherQuestionMetadata.id, User.clone(otherQuestionMetadata.askedBy));
+    }
+
     constructor(id: string, askedBy: User) {
         this.id = id;
         this.askedBy = askedBy;

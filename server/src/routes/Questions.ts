@@ -18,7 +18,8 @@ export const askQuestion = (elasticSearchClient: ElasticSearchClient) => async (
 export const answerQuestion = (elasticSearchClient: ElasticSearchClient) => async (req: Request, res: Response) => {
     const {answer}: { answer: Answer } = req.body;
     console.log(answer);
-    res.send({answer});
+    const question = await elasticSearchClient.answerQuestion(Answer.clone(answer));
+    res.send({question});
 };
 
 export const search = (elasticSearchClient: ElasticSearchClient) => async (req: Request, res: Response) => {

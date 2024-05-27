@@ -3,6 +3,10 @@ export class User {
     private readonly firstName?: string;
     private readonly lastName?: string;
 
+    public static clone(otherUser: User) {
+        return new User(otherUser.nickName, otherUser.firstName, otherUser.lastName);
+    }
+
     constructor(nickName: string, firstName?: string, lastName?: string) {
         this.nickName = nickName;
         this.firstName = firstName;

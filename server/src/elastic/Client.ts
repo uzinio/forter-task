@@ -1,5 +1,5 @@
 import {Client} from "@elastic/elasticsearch";
-import {Question} from "../types";
+import {Answer, Question} from "../types";
 
 const node = 'https://ac15292a5ea649b9800141d45a3b5700.us-central1.gcp.cloud.es.io:443';
 const index = 'qna-index';
@@ -16,15 +16,17 @@ export class ElasticSearchClient {
         });
     }
 
-    public async queryQuestions(): Promise<Question[]> {
-        const searchResult = await this.client.search({index});
-        return searchResult.hits.hits.map(hit => Question.clone(hit._source as Question));
-    }
-
     public async getQuestion(id: string): Promise<Question> {
+        console.log(index);
+        console.log(id);
         const document = await this.client.get({index, id});
         const dbQuestion = document._source;
         return Question.clone(dbQuestion as Question);
+    }
+
+    public async queryQuestions(): Promise<Question[]> {
+        const searchResult = await this.client.search({index});
+        return searchResult.hits.hits.map(hit => Question.clone(hit._source as Question));
     }
 
     public async search(term: string): Promise<Question[]> {
@@ -51,6 +53,15 @@ export class ElasticSearchClient {
         });
         console.log(result);
         return question;
+    }
+
+    public async answerQuestion(answer: Answer): Promise<Question> {
+        const question = await this.getQuestion(answer.getQuestionMetadata.getId);
+        console.log(question);
+        const newAnswers = question.getAnswers || [];
+        newAnswers.push(answer);
+        const newQuestion = new Question(question.getQuestionMetadata, question.getContent, newAnswers);
+        return await this.askQuestion(newQuestion);
     }
 
 }
