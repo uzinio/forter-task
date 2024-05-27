@@ -18,7 +18,7 @@ export class ElasticSearchClient {
 
     public async queryQuestions(): Promise<Question[]> {
         const searchResult = await this.client.search({index});
-        return searchResult.hits.hits.map(hit => hit._source as Question);
+        return searchResult.hits.hits.map(hit => Question.clone(hit._source as Question));
     }
 
     public async getQuestion(id: string): Promise<Question> {
@@ -44,7 +44,7 @@ export class ElasticSearchClient {
     }
 
     public async askQuestion(question: Question): Promise<Question> {
-        const bulkData = [{index: {_index: index, pipeline, _id: question.getQuestionMetadata.id}}, question];
+        const bulkData = [{index: {_index: index, pipeline, _id: question.getQuestionMetadata.getId}}, question];
         const result = await this.client.bulk({
             refresh: true,
             operations: bulkData
