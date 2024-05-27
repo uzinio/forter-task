@@ -1,15 +1,15 @@
 import {Request, Response} from "express";
 import {Answer, Question, QuestionMetadata, User} from "../types";
-import {ElasticSearchClient} from "../elastic";
+import {QuestionsIndexClient} from "../elastic";
 import crypto from "crypto";
 
-export const queryQuestions = (elasticSearchClient: ElasticSearchClient) => async (req: Request, res: Response) => {
+export const queryQuestions = (elasticSearchClient: QuestionsIndexClient) => async (req: Request, res: Response) => {
     const questions: Question[] = await elasticSearchClient.queryQuestions();
     console.log(questions);
     res.send({questions});
 };
 
-export const askQuestion = (elasticSearchClient: ElasticSearchClient) => async (req: Request, res: Response) => {
+export const askQuestion = (elasticSearchClient: QuestionsIndexClient) => async (req: Request, res: Response) => {
     const {question: inputQuestion}: { question: Question } = req.body;
     const questionObj = Question.clone(inputQuestion);
     const newQuestionMetadata = new QuestionMetadata(crypto.randomUUID(), User.clone(req.body.question.questionMetadata.askedBy))
@@ -19,7 +19,7 @@ export const askQuestion = (elasticSearchClient: ElasticSearchClient) => async (
     res.send({question});
 };
 
-export const answerQuestion = (elasticSearchClient: ElasticSearchClient) => async (req: Request, res: Response) => {
+export const answerQuestion = (elasticSearchClient: QuestionsIndexClient) => async (req: Request, res: Response) => {
     const {answer}: { answer: Answer } = req.body;
     const answerObj = Answer.clone(answer);
     answerObj.setId(crypto.randomUUID());
@@ -28,7 +28,7 @@ export const answerQuestion = (elasticSearchClient: ElasticSearchClient) => asyn
     res.send({question});
 };
 
-export const search = (elasticSearchClient: ElasticSearchClient) => async (req: Request, res: Response) => {
+export const search = (elasticSearchClient: QuestionsIndexClient) => async (req: Request, res: Response) => {
     const {term}: { term: string } = req.body;
     const relatedQuestions: Question[] = await elasticSearchClient.search(term);
     res.send({relatedQuestions});

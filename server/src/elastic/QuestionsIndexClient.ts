@@ -1,41 +1,36 @@
 import {Client} from "@elastic/elasticsearch";
-import {Answer, Question} from "../types";
+import {Answer, Question, UserInfo} from "../types";
+import {ElasticSearchClient} from "./ElasticSearchClient";
 
-const node = 'https://ac15292a5ea649b9800141d45a3b5700.us-central1.gcp.cloud.es.io:443';
-const index = 'qna-index';
-const pipeline = 'ml-inference-qna-index-_elser_model_2_linux-x86_64';
-const modelId = '.elser_model_2_linux-x86_64'
+const qnaIndexName = 'qna-index';
+const mlPipelineId = 'ml-inference-qna-index-_elser_model_2_linux-x86_64';
+const mlModelId = '.elser_model_2_linux-x86_64';
+const qnaUsersIndexName = 'qna-users-index';
 
-export class ElasticSearchClient {
-    private readonly client: Client;
+export class QuestionsIndexClient extends ElasticSearchClient {
 
     constructor(apiKey: string) {
-        this.client = new Client({
-            node,
-            auth: {apiKey}
-        });
+        super(apiKey);
     }
 
     public async getQuestion(id: string): Promise<Question> {
-        console.log(index);
-        console.log(id);
-        const document = await this.client.get({index, id});
+        const document = await this.client.get({index: qnaIndexName, id});
         const dbQuestion = document._source;
         return Question.clone(dbQuestion as Question);
     }
 
     public async queryQuestions(): Promise<Question[]> {
-        const searchResult = await this.client.search({index});
+        const searchResult = await this.client.search({index: qnaIndexName});
         return searchResult.hits.hits.map(hit => Question.clone(hit._source as Question));
     }
 
     public async search(term: string): Promise<Question[]> {
         const searchResults = await this.client.search({
-            index,
+            index: qnaIndexName,
             query: {
                 text_expansion: {
                     content: {
-                        model_id: modelId,
+                        model_id: mlModelId,
                         model_text: term
                     }
                 }
@@ -46,7 +41,13 @@ export class ElasticSearchClient {
     }
 
     public async askQuestion(question: Question): Promise<Question> {
-        const bulkData = [{index: {_index: index, pipeline, _id: question.getQuestionMetadata.getId}}, question];
+        const bulkData = [{
+            index: {
+                _index: qnaIndexName,
+                pipeline: mlPipelineId,
+                _id: question.getQuestionMetadata.getId
+            }
+        }, question];
         const result = await this.client.bulk({
             refresh: true,
             operations: bulkData
