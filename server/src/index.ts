@@ -9,18 +9,19 @@ const app: Express = express();
 const port = process.env.PORT || 3000;
 const qnaIndexPrivateKey = process.env.QNA_INDEX_PRIVATE_KEY || '';
 const qnaUsersIndexPrivateKey = process.env.QNA_USERS_INDEX_PRIVATE_KEY || '';
-const qnaIndexClient = new QuestionsIndexClient(qnaIndexPrivateKey);
-const qnaUsersIndexClient = new UsersIndexClient(qnaUsersIndexPrivateKey);
+const questionsIndexClient = new QuestionsIndexClient(qnaIndexPrivateKey);
+const usersIndexClient = new UsersIndexClient(qnaUsersIndexPrivateKey);
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 app.use(jsonParser);
 
-app.get("/", queryQuestions(qnaIndexClient));
-app.post("/ask-question", askQuestion(qnaIndexClient));
-app.post("/answer-question", answerQuestion(qnaIndexClient));
-app.post("/search", search(qnaIndexClient))
-app.get("/user-info/:nickName", getUserInfo(qnaUsersIndexClient))
-app.post("/user-info", addUserInfo(qnaUsersIndexClient))
+app.get("/", queryQuestions(questionsIndexClient));
+app.post("/ask-question", askQuestion(questionsIndexClient, usersIndexClient));
+app.post("/answer-question", answerQuestion(questionsIndexClient));
+app.post("/search", search(questionsIndexClient));
+
+app.get("/user-info/:nickName", getUserInfo(usersIndexClient));
+app.post("/user-info", addUserInfo(usersIndexClient));
 
 app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);

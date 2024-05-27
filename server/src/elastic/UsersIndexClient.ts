@@ -1,5 +1,5 @@
-import {Question, UserInfo} from "../types";
 import {ElasticSearchClient} from "./ElasticSearchClient";
+import {UserInfo} from "../types";
 
 const index = 'qna-users-index';
 
@@ -11,7 +11,7 @@ export class UsersIndexClient extends ElasticSearchClient {
 
     public async getUserInfo(nickName: string): Promise<UserInfo> {
         const document = await this.client.get({index, id: nickName});
-        return document._source as UserInfo;
+        return UserInfo.clone(document._source as UserInfo);
     }
 
     public async addUserInfo(userInfo: UserInfo): Promise<UserInfo> {

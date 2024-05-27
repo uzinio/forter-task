@@ -1,7 +1,7 @@
 export class User {
-    private readonly nickName: string;
-    private readonly firstName?: string;
-    private readonly lastName?: string;
+    protected readonly nickName: string;
+    protected readonly firstName?: string;
+    protected readonly lastName?: string;
 
     public static clone(otherUser: User) {
         return new User(otherUser.nickName, otherUser.firstName, otherUser.lastName);
