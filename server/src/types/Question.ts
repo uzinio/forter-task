@@ -8,7 +8,7 @@ export class Question {
         return new Question(QuestionMetadata.clone(otherQuestion.questionMetadata), otherQuestion.content, otherAnswers.map(a => Answer.clone(a)));
     }
 
-    private readonly questionMetadata: QuestionMetadata;
+    private questionMetadata: QuestionMetadata;
     private readonly content: string;
     private readonly answers: Answer[];
 
@@ -28,5 +28,9 @@ export class Question {
 
     get getAnswers(): Answer[] {
         return this.answers;
+    }
+
+    public setQuestionMetadata(questionMetadata: QuestionMetadata) {
+        this.questionMetadata = questionMetadata;
     }
 }

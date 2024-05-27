@@ -1,7 +1,7 @@
 import {User} from "./User";
 
 export class QuestionMetadata {
-    private readonly id: string;
+    private id: string;
     private readonly askedBy: User;
 
     public static clone(otherQuestionMetadata: QuestionMetadata) {
@@ -20,6 +20,10 @@ export class QuestionMetadata {
 
     get getAskedBy(): User {
         return this.askedBy;
+    }
+
+    set setId(id: string) {
+        this.id = id;
     }
 }
 

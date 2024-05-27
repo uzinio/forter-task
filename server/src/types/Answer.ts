@@ -2,7 +2,7 @@ import {User} from "./User";
 import {QuestionMetadata} from "./QuestionMetadata";
 
 export class Answer {
-    private readonly id: String;
+    private id: String;
     private readonly questionMetadata: QuestionMetadata;
     private readonly answeredBy: User;
     private readonly content: String;
@@ -32,5 +32,9 @@ export class Answer {
 
     get getContent(): String {
         return this.content;
+    }
+
+    public setId(id: string) {
+        this.id = id;
     }
 }
