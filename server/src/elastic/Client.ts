@@ -30,7 +30,7 @@ export class ElasticSearchClient {
     public async search(term: string): Promise<Question[]> {
         const searchResults = await this.client.search({
             index,
-            post_filter: {
+            query: {
                 text_expansion: {
                     content: {
                         model_id: modelId,
