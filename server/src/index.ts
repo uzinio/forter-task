@@ -1,21 +1,20 @@
-import express, {Express, NextFunction, Request, Response} from "express";
+import express, {Express} from "express";
 import dotenv from "dotenv";
 import {addUserInfo, answerQuestion, askQuestion, getUserInfo, queryQuestions, search} from "./routes";
-import {QuestionsIndexClient, UsersIndexClient} from "./elastic";
 import {errorHandlingMiddleware} from "./middleware";
 import "express-async-errors";
+import {initializeElasticSearchClients} from "./elastic";
 
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT || 3000;
-const qnaIndexPrivateKey = process.env.QNA_INDEX_PRIVATE_KEY || '';
-const qnaUsersIndexPrivateKey = process.env.QNA_USERS_INDEX_PRIVATE_KEY || '';
-const questionsIndexClient = new QuestionsIndexClient(qnaIndexPrivateKey);
-const usersIndexClient = new UsersIndexClient(qnaUsersIndexPrivateKey);
+const port = (process.env.NODE_ENV === 'test' ? process.env.TEST_PORT : process.env.PORT) || 3000;
+
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 app.use(jsonParser);
+
+const {questionsIndexClient, usersIndexClient} = initializeElasticSearchClients();
 
 app.get("/", queryQuestions(questionsIndexClient));
 app.post("/ask-question", askQuestion(questionsIndexClient, usersIndexClient));
@@ -27,6 +26,8 @@ app.post("/user-info", addUserInfo(usersIndexClient));
 
 app.use(errorHandlingMiddleware);
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
 });
+
+export default app;

@@ -2,9 +2,6 @@ import {NextFunction, Request, Response} from "express";
 import {RouteException} from "../types";
 
 export const errorHandlingMiddleware = (err: Error, req: Request, res: Response, next: NextFunction) => {
-    console.log(err);
-    console.log(err.message);
-    console.log(err.name);
     const {message, statusCode} = extractStatusAndErrorMessage(err);
     res.status(statusCode).send({errors: [{message}]});
 };

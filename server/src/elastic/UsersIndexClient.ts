@@ -23,4 +23,10 @@ export class UsersIndexClient extends ElasticSearchClient {
         console.log(result.items[0].index);
         return userInfo;
     }
+
+    public async deleteUserInfo(id: string): Promise<boolean> {
+        const deleteByQuery = {index, body: {query: {match: {_id: id}}}};
+        await this.client.deleteByQuery(deleteByQuery);
+        return true;
+    }
 }
