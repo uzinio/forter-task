@@ -2,10 +2,10 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "./dist/index.ts",
+  "main": "./dist/src/index.ts",
   "scripts": {
     "build": "npx tsc",
-    "start": "npm run build && node dist/index.js",
+    "start": "npm run build && node dist/src/index.js",
     "dev": "nodemon src/index.ts",
     "test": "npm run build && jest --forceExit --maxWorkers=1"
   },
