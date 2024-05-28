@@ -1,11 +1,9 @@
-import {Client} from "@elastic/elasticsearch";
-import {Answer, Question, UserInfo} from "../types";
+import {Answer, Question} from "../types";
 import {ElasticSearchClient} from "./ElasticSearchClient";
 
 const qnaIndexName = 'qna-index';
 const mlPipelineId = 'ml-inference-qna-index-_elser_model_2_linux-x86_64';
 const mlModelId = '.elser_model_2_linux-x86_64';
-const qnaUsersIndexName = 'qna-users-index';
 
 export class QuestionsIndexClient extends ElasticSearchClient {
 

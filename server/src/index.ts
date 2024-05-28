@@ -1,7 +1,9 @@
-import express, {Express} from "express";
+import express, {Express, NextFunction, Request, Response} from "express";
 import dotenv from "dotenv";
 import {addUserInfo, answerQuestion, askQuestion, getUserInfo, queryQuestions, search} from "./routes";
 import {QuestionsIndexClient, UsersIndexClient} from "./elastic";
+import {errorHandlingMiddleware} from "./middleware";
+import "express-async-errors";
 
 dotenv.config();
 
@@ -17,11 +19,13 @@ app.use(jsonParser);
 
 app.get("/", queryQuestions(questionsIndexClient));
 app.post("/ask-question", askQuestion(questionsIndexClient, usersIndexClient));
-app.post("/answer-question", answerQuestion(questionsIndexClient));
+app.post("/answer-question", answerQuestion(questionsIndexClient, usersIndexClient));
 app.post("/search", search(questionsIndexClient));
 
 app.get("/user-info/:nickName", getUserInfo(usersIndexClient));
 app.post("/user-info", addUserInfo(usersIndexClient));
+
+app.use(errorHandlingMiddleware);
 
 app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);

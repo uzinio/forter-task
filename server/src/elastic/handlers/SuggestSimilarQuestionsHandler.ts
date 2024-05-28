@@ -1,9 +1,9 @@
 import {QuestionsIndexClient} from "../QuestionsIndexClient";
-import {UsersIndexClient} from "../UsersIndexClient";
-import {Answer, OfferSimilarQuestion, Question, User, UserInfo} from "../../types";
-import {AskQuestionResponse} from "../../types/AskQuestionResponse";
+import {Answer, AskQuestionResponse, OfferSimilarQuestion, Question, User, UserInfo} from "../../types";
+import crypto from "crypto";
 
 export const suggestSimilarQuestionsHandler = (questionsIndexClient: QuestionsIndexClient) => async (question: Question, userInfo: UserInfo): Promise<AskQuestionResponse> => {
+    const filterById = (_question: Question) => _question.getQuestionMetadata.getId !== question.getQuestionMetadata.getId;
     switch (userInfo.getPreferences.offerSimilarQuestion) {
         case OfferSimilarQuestion.NONE: {
             return {question, suggestions: [], errors: []};
@@ -11,10 +11,10 @@ export const suggestSimilarQuestionsHandler = (questionsIndexClient: QuestionsIn
         case OfferSimilarQuestion.AUTO: {
             const suggestions = await questionsIndexClient.search(question.getContent);
             if (suggestions) {
-                const filtered = suggestions.filter(q => q.getQuestionMetadata.getId !== question.getQuestionMetadata.getId);
+                const filtered = suggestions.filter(filterById);
                 if (filtered) {
                     const url = `https://localhost:8000/questions/${filtered[0].getQuestionMetadata.getId}`;
-                    await questionsIndexClient.answerQuestion(new Answer("", question.getQuestionMetadata, new User("bot"), `I think this question was already asked here ${url}`))
+                    await questionsIndexClient.answerQuestion(new Answer(crypto.randomUUID(), question.getQuestionMetadata, new User("bot"), `I think this question was already asked here ${url}`))
                 }
 
             }
@@ -22,7 +22,7 @@ export const suggestSimilarQuestionsHandler = (questionsIndexClient: QuestionsIn
         }
         case OfferSimilarQuestion.FILTERED: {
             const suggestions = await questionsIndexClient.search(question.getContent);
-            const filtered = suggestions.filter(q => q.getQuestionMetadata.getId !== question.getQuestionMetadata.getId);
+            const filtered = suggestions.filter(filterById);
             return {
                 question,
                 suggestions: filtered ? filtered.slice(0, userInfo.getPreferences.numberOfQuestionsToOffer) : [],
@@ -30,5 +30,4 @@ export const suggestSimilarQuestionsHandler = (questionsIndexClient: QuestionsIn
             };
         }
     }
-
 }
