@@ -1,9 +1,9 @@
 import {User} from "./User";
 
 export enum OfferSimilarQuestion {
-    NONE = 0,
-    AUTO = 1,
-    FILTERED = 2
+    FILTERED = 0,
+    NONE = 1,
+    AUTO = 2
 }
 
 export type Preferences = {
@@ -13,9 +13,9 @@ export type Preferences = {
 }
 
 const defaultPreferences = {
-    offerSimilarQuestion: OfferSimilarQuestion.NONE,
+    offerSimilarQuestion: OfferSimilarQuestion.FILTERED,
     presentBotAnswers: true,
-    numberOfQuestionsToOffer: 0
+    numberOfQuestionsToOffer: 10
 }
 
 export class UserInfo extends User {
