@@ -7,7 +7,7 @@ import {throwIfNotExists} from "./Common";
 
 export const queryQuestions = (elasticSearchClient: QuestionsIndexClient) => async (req: Request, res: Response) => {
     const questions: Question[] = await elasticSearchClient.queryQuestions();
-    console.log(questions);
+    // console.log(questions);
     res.send({questions});
 };
 
@@ -31,7 +31,7 @@ export const answerQuestion = (questionsIndexClient: QuestionsIndexClient, users
     const questionId = answerObj.getQuestionMetadata.getId;
     await throwIfNotExists<Question>(() => questionsIndexClient.getQuestion(questionId), 'question');
     answerObj.setId(crypto.randomUUID());
-    console.log(answerObj);
+    // console.log(answerObj);
     const question = await questionsIndexClient.answerQuestion(answerObj);
     res.send({question});
 };

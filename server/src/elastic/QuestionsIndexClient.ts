@@ -34,7 +34,7 @@ export class QuestionsIndexClient extends ElasticSearchClient {
                 }
             }
         });
-        console.log(searchResults.hits.hits);
+        // console.log(searchResults.hits.hits);
         return searchResults.hits.hits.map(hit => Question.clone(hit._source as Question));
     }
 
@@ -50,13 +50,13 @@ export class QuestionsIndexClient extends ElasticSearchClient {
             refresh: true,
             operations: bulkData
         });
-        console.log(result);
+        // console.log(result);
         return question;
     }
 
     public async answerQuestion(answer: Answer): Promise<Question> {
         const question = await this.getQuestion(answer.getQuestionMetadata.getId);
-        console.log(question);
+        // console.log(question);
         const newAnswers = question.getAnswers || [];
         newAnswers.push(answer);
         const newQuestion = new Question(question.getQuestionMetadata, question.getContent, newAnswers);

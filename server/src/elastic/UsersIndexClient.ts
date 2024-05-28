@@ -20,7 +20,7 @@ export class UsersIndexClient extends ElasticSearchClient {
             refresh: true,
             operations: bulkData
         });
-        console.log(result.items[0].index);
+        // console.log(result.items[0].index);
         return userInfo;
     }
 

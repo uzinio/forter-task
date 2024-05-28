@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../../src";
+import app, {closeServer} from "../../src";
 import {initializeElasticSearchClients} from "../../src/elastic";
 import {Fixtures} from "../common";
 
@@ -7,9 +7,14 @@ import {Fixtures} from "../common";
 describe("questions route", () => {
     const {usersIndexClient} = initializeElasticSearchClients();
 
-    beforeEach(async() => {
+    beforeEach(async () => {
         jest.setTimeout(30000);
-        usersIndexClient.addUserInfo(Fixtures.user.valid);
+        await usersIndexClient.addUserInfo(Fixtures.user.valid);
+    });
+
+    afterEach(async () => {
+        closeServer();
+        setTimeout(() => {}, 3000);
     });
 
     test("should return 200 when calling to queryQuestions", async () => {

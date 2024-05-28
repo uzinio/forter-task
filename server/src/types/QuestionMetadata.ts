@@ -5,7 +5,7 @@ export class QuestionMetadata {
     private readonly askedBy: User;
 
     public static clone(otherQuestionMetadata: QuestionMetadata) {
-        console.log(otherQuestionMetadata);
+        // console.log(otherQuestionMetadata);
         return new QuestionMetadata(otherQuestionMetadata.id, User.clone(otherQuestionMetadata.askedBy));
     }
 

@@ -11,9 +11,9 @@ describe("users route", () => {
     });
 
     afterEach(async () => {
-        closeServer();
-        setTimeout(() => {}, 3000)
         await usersIndexClient.deleteUserInfo(Fixtures.userInfo.valid.getNickName);
+        closeServer();
+        setTimeout(() => {}, 3000);
     });
 
     test("should return 201 when creating a valid user", async () => {
