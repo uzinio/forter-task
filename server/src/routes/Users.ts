@@ -24,5 +24,5 @@ export const updateUserInfo = (elasticSearchClient: UsersIndexClient) => async (
     const nickName = userObj.getNickName;
     await throwIfNotExists<UserInfo>(() => elasticSearchClient.getUserInfo(nickName), 'user');
     const userInfo = await elasticSearchClient.addUserInfo(new UserInfo(userObj.getNickName, userObj.getFirstName, userObj.getLastName, preferences))
-    res.send({userInfo});
+    res.status(204).send({userInfo});
 };
