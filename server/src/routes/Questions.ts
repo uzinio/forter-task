@@ -3,6 +3,7 @@ import {Answer, Question, QuestionMetadata, RouteException, User, UserInfo} from
 import {QuestionsIndexClient, UsersIndexClient} from "../elastic";
 import crypto from "crypto";
 import {suggestSimilarQuestionsHandler} from "../elastic/handlers/";
+import {assertExistsOrThrow} from "./Common";
 
 export const queryQuestions = (elasticSearchClient: QuestionsIndexClient) => async (req: Request, res: Response) => {
     const questions: Question[] = await elasticSearchClient.queryQuestions();
@@ -40,14 +41,6 @@ export const search = (elasticSearchClient: QuestionsIndexClient) => async (req:
     const relatedQuestions: Question[] = await elasticSearchClient.search(term);
     res.send({relatedQuestions});
 };
-
-async function assertExistsOrThrow<T>(func: () => Promise<T>, entity: string): Promise<T>  {
-    try {
-        return await func();
-    } catch (err: any) {
-        throw new RouteException(`${entity} not found`, 404);
-    }
-}
 
 
 
