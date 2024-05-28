@@ -5,9 +5,9 @@
   "main": "./dist/index.ts",
   "scripts": {
     "build": "npx tsc",
-    "start": "npx tsc && node dist/index.js",
+    "start": "npm run build && node dist/index.js",
     "dev": "nodemon src/index.ts",
-    "test": "jest --forceExit -maxWorkers=1"
+    "test": "npm run build && jest --forceExit --maxWorkers=1"
   },
   "keywords": [],
   "author": "",

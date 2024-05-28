@@ -1,6 +1,6 @@
 import express, {Express} from "express";
 import dotenv from "dotenv";
-import {addUserInfo, answerQuestion, askQuestion, getUserInfo, queryQuestions, search} from "./routes";
+import {addUserInfo, answerQuestion, askQuestion, getUserInfo, queryQuestions, search, updateUserInfo} from "./routes";
 import {errorHandlingMiddleware} from "./middleware";
 import "express-async-errors";
 import {initializeElasticSearchClients} from "./elastic";
@@ -23,11 +23,17 @@ app.post("/search", search(questionsIndexClient));
 
 app.get("/user-info/:nickName", getUserInfo(usersIndexClient));
 app.post("/user-info", addUserInfo(usersIndexClient));
+app.patch("/user-info", updateUserInfo(usersIndexClient));
 
 app.use(errorHandlingMiddleware);
 
 const server = app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
 });
+
+export const closeServer = () => {
+    console.log('Closing server')
+    server.close();
+}
 
 export default app;

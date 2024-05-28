@@ -12,7 +12,7 @@ export type Preferences = {
     numberOfQuestionsToOffer: number;
 }
 
-const defaultPreferences = {
+export const defaultPreferences = {
     offerSimilarQuestion: OfferSimilarQuestion.FILTERED,
     presentBotAnswers: true,
     numberOfQuestionsToOffer: 10

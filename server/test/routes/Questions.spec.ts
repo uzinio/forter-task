@@ -3,10 +3,12 @@ import app from "../../src";
 import {initializeElasticSearchClients} from "../../src/elastic";
 import {Fixtures} from "../common";
 
-describe("qna app", () => {
-    const {questionsIndexClient, usersIndexClient} = initializeElasticSearchClients();
+
+describe("questions route", () => {
+    const {usersIndexClient} = initializeElasticSearchClients();
 
     beforeEach(async() => {
+        jest.setTimeout(30000);
         usersIndexClient.addUserInfo(Fixtures.user.valid);
     });
 
@@ -16,7 +18,7 @@ describe("qna app", () => {
     });
 
     test("should return 404 when user that asks question does not exist", async () => {
-        const res = await request(app).post("/ask-question").set('Content-Type', 'application/json').send({question: Fixtures.question.invalid});
+        const res = await request(app).post("/ask-question").set('Content-Type', 'application/json').send({question: Fixtures.question.invalidUserDoesNotExist});
         expect(res.status).toEqual(404);
     });
 
@@ -24,5 +26,4 @@ describe("qna app", () => {
         const res = await request(app).post("/ask-question").set('Content-Type', 'application/json').send({question: Fixtures.question.valid});
         expect(res.status).toEqual(200);
     });
-
 });
