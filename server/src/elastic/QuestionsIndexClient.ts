@@ -18,7 +18,7 @@ export class QuestionsIndexClient extends ElasticSearchClient {
     }
 
     public async queryQuestions(): Promise<Question[]> {
-        const searchResult = await this.client.search({index: qnaIndexName});
+        const searchResult = await this.client.search({index: qnaIndexName, size: 100});
         return searchResult.hits.hits.map(hit => Question.clone(hit._source as Question));
     }
 

@@ -6,7 +6,7 @@ export const suggestSimilarQuestionsHandler = (questionsIndexClient: QuestionsIn
     const filterById = (_question: Question) => _question.getQuestionMetadata.getId !== question.getQuestionMetadata.getId;
     switch (userInfo.getPreferences.offerSimilarQuestion) {
         case OfferSimilarQuestion.NONE: {
-            return {question, suggestions: [], errors: []};
+            return {question, suggestions: []};
         }
         case OfferSimilarQuestion.AUTO: {
             const suggestions = await questionsIndexClient.search(question.getContent);
@@ -18,15 +18,14 @@ export const suggestSimilarQuestionsHandler = (questionsIndexClient: QuestionsIn
                 }
 
             }
-            return {question, suggestions: [], errors: []};
+            return {question, suggestions: []};
         }
         case OfferSimilarQuestion.FILTERED: {
             const suggestions = await questionsIndexClient.search(question.getContent);
             const filtered = suggestions.filter(filterById);
             return {
                 question,
-                suggestions: filtered ? filtered.slice(0, userInfo.getPreferences.numberOfQuestionsToOffer) : [],
-                errors: []
+                suggestions: filtered ? filtered.slice(0, userInfo.getPreferences.numberOfQuestionsToOffer) : []
             };
         }
     }

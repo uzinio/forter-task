@@ -1,40 +1,33 @@
-import {LitElement, html} from 'lit';
+import {html, LitElement} from 'lit';
 import style from './styles.css.js';
 import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 
-/**
- * An example element.
- */
 export class MainBoard extends LitElement {
     static get properties() {
         return {
-            /**
-             * The name to say "Hello" to.
-             * @type {string}
-             */
-            name: {type: String},
-
-            /**
-             * The number of times the button has been clicked.
-             * @type {number}
-             */
-            count: {type: Number},
+            questions: {type: Object},
         };
     }
 
     constructor() {
         super();
-        this.name = 'Bot';
-        this.count = 0;
         this.socket = io('http://localhost:3000', {
             extraHeaders: {
                 "Access-Control-Allow-Origin": "*"
             }
         });
-        this.socket.on('new connection', console.log);
+        this.socket.on('new connection', (_data) => {
+            this.questions = _data.questions;
+            console.log(this.questions);
+        });
     }
 
     static styles = [style];
+
+
+    onButtonClick() {
+        console.log('Here');
+    }
 
     render() {
         const {name, count} = this;
@@ -48,7 +41,7 @@ export class MainBoard extends LitElement {
                 <script src="/node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>
                 <script src="/node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
                 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-                
+
             </head>
             <body>
             <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
@@ -60,8 +53,11 @@ export class MainBoard extends LitElement {
                             </li>
                             <li class="nav-item">
                                 <form class="d-flex" role="search">
-                                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                                    <button class="btn btn-outline-success" type="submit">Search</button>
+                                    <input class="form-control me-2" type="search" placeholder="Search"
+                                           aria-label="Search">
+                                    <button class="btn btn-outline-success" type="submit"
+                                            @click="${this.onButtonClick}">Search
+                                    </button>
                                 </form>
                             </li>
                             <li class="nav-item">
@@ -69,7 +65,7 @@ export class MainBoard extends LitElement {
                             </li>
                         </ul>
                         <!-- search button and box-->
-                        
+
                     </div>
                 </div>
             </nav>
@@ -79,11 +75,12 @@ export class MainBoard extends LitElement {
                     <h1 class="text-center">Forter QnA</h1>
                     <p class="lead text-center">Ask anything, Answer whatever</p>
 
-                    ${[1,2,3].map((color) =>
-                            html`<question-component></question-component>`
-                    )}
-                    
-                    
+                    ${this.questions ? this.questions.map((question) =>
+                            html`
+                                <question-component .data="${question}"></question-component>`
+                    ) : html`<h1>Loading...</h1>`}
+
+
                 </div>
             </main>
 

@@ -1,10 +1,14 @@
 import {LitElement, html} from 'lit';
 import style from './styles.css.js';
+import {questionType} from "../types/index.js";
 
-/**
- * An example element.
- */
 export class QuestionComponent extends LitElement {
+    static get properties() {
+        return {
+            data: {type: questionType},
+        };
+    }
+
     static styles = [style];
 
     render() {
@@ -12,9 +16,9 @@ export class QuestionComponent extends LitElement {
             <script src="/node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>
             <script src="/node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-            <div class="card">
+            <div class="card question">
                 <div class="card-body">
-                    This is some text within a card body.
+                    ${this.data.content + ' by ' +  this.data.questionMetadata.askedBy.nickName}
                 </div>
             </div>
         `;

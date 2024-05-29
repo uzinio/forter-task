@@ -5,8 +5,9 @@ import {addUserInfo, answerQuestion, askQuestion, getUserInfo, queryQuestions, s
 import {errorHandlingMiddleware} from "./middleware";
 import "express-async-errors";
 import {initializeElasticSearchClients} from "./elastic";
+
 const cors = require('cors');
-import { Server } from 'socket.io';
+import {Server} from 'socket.io';
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ const app = express();
 
 app.use(jsonParser);
 app.use(cors());
-const http =  httpServer.createServer(app);
+const http = httpServer.createServer(app);
 
 const server = http.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
@@ -51,9 +52,10 @@ export const closeServer = () => {
     server.close();
 }
 
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
     console.log('new connection');
-    io.emit('new connection', 'new connection');
+    const questions = await questionsIndexClient.queryQuestions();
+    io.emit('new connection', {questions});
 });
 
 export default app;
