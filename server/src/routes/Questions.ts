@@ -4,6 +4,7 @@ import {QuestionsIndexClient, UsersIndexClient} from "../elastic";
 import crypto from "crypto";
 import {suggestSimilarQuestionsHandler} from "../elastic/handlers/";
 import {throwIfNotExists} from "./Common";
+import {Server} from "socket.io";
 
 export const queryQuestions = (elasticSearchClient: QuestionsIndexClient) => async (req: Request, res: Response) => {
     const questions: Question[] = await elasticSearchClient.queryQuestions();
@@ -11,7 +12,7 @@ export const queryQuestions = (elasticSearchClient: QuestionsIndexClient) => asy
     res.send({questions});
 };
 
-export const askQuestion = (questionsIndexClient: QuestionsIndexClient, usersIndexClient: UsersIndexClient) => async (req: Request, res: Response) => {
+export const askQuestion = (questionsIndexClient: QuestionsIndexClient, usersIndexClient: UsersIndexClient, io: Server) => async (req: Request, res: Response) => {
     const {question: inputQuestion}: { question: Question } = req.body;
     const questionObj = Question.clone(inputQuestion);
     const nickName = questionObj.getQuestionMetadata.getAskedBy.getNickName;
@@ -20,10 +21,11 @@ export const askQuestion = (questionsIndexClient: QuestionsIndexClient, usersInd
     questionObj.setQuestionMetadata(newQuestionMetadata);
     const question = await questionsIndexClient.askQuestion(Question.clone(questionObj));
     const askQuestionResponse = await suggestSimilarQuestionsHandler(questionsIndexClient)(question, userInfo);
+    io.emit('question-created', {...question} as any);
     res.send({askQuestionResponse});
 };
 
-export const answerQuestion = (questionsIndexClient: QuestionsIndexClient, usersIndexClient: UsersIndexClient) => async (req: Request, res: Response) => {
+export const answerQuestion = (questionsIndexClient: QuestionsIndexClient, usersIndexClient: UsersIndexClient, io: Server) => async (req: Request, res: Response) => {
     const {answer}: { answer: Answer } = req.body;
     const answerObj = Answer.clone(answer);
     const nickName = answerObj.getAnsweredBy.getNickName;
@@ -31,8 +33,8 @@ export const answerQuestion = (questionsIndexClient: QuestionsIndexClient, users
     const questionId = answerObj.getQuestionMetadata.getId;
     await throwIfNotExists<Question>(() => questionsIndexClient.getQuestion(questionId), 'question');
     answerObj.setId(crypto.randomUUID());
-    // console.log(answerObj);
     const question = await questionsIndexClient.answerQuestion(answerObj);
+    io.emit('question-updated', {...question} as any);
     res.send({question});
 };
 

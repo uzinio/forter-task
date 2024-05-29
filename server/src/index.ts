@@ -37,8 +37,8 @@ const io = new Server(http, {
 const {questionsIndexClient, usersIndexClient} = initializeElasticSearchClients();
 
 app.get("/", queryQuestions(questionsIndexClient));
-app.post("/ask-question", askQuestion(questionsIndexClient, usersIndexClient));
-app.post("/answer-question", answerQuestion(questionsIndexClient, usersIndexClient));
+app.post("/ask-question", askQuestion(questionsIndexClient, usersIndexClient, io));
+app.post("/answer-question", answerQuestion(questionsIndexClient, usersIndexClient, io));
 app.post("/search", search(questionsIndexClient));
 
 app.get("/user-info/:nickName", getUserInfo(usersIndexClient));
@@ -55,7 +55,7 @@ export const closeServer = () => {
 io.on('connection', async (socket) => {
     console.log('new connection');
     const questions = await questionsIndexClient.queryQuestions();
-    io.emit('new connection', {questions});
+    io.emit('new-connection', {questions});
 });
 
 export default app;

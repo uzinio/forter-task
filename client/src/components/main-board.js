@@ -1,12 +1,20 @@
 import {html, LitElement} from 'lit';
 import style from './styles.css.js';
 import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+import {questionType} from "../types/index.js";
 
 export class MainBoard extends LitElement {
     static get properties() {
         return {
-            questions: {type: Object},
+            questions: {type: [questionType]},
+            gotUpdate: Boolean,
         };
+    }
+
+    shouldUpdate(changedProps) {
+        const currentVal = this.gotUpdate;
+        this.gotUpdate = false;
+        return currentVal;
     }
 
     constructor() {
@@ -16,9 +24,20 @@ export class MainBoard extends LitElement {
                 "Access-Control-Allow-Origin": "*"
             }
         });
-        this.socket.on('new connection', (_data) => {
+        this.socket.on('new-connection', (_data) => {
             this.questions = _data.questions;
             console.log(this.questions);
+            this.gotUpdate = true;
+        });
+        this.socket.on('question-created', (createdQuestion) => {
+            this.questions.push(createdQuestion);
+            this.gotUpdate = true;
+        });
+        this.socket.on('question-updated', (updatedQuestion) => {
+            const filteredQuestions = this.questions.filter(q => q.questionMetadata.id !== updatedQuestion.questionMetadata.id);
+            filteredQuestions.push(updatedQuestion);
+            this.questions = filteredQuestions;
+            this.gotUpdate = true;
         });
     }
 
@@ -30,7 +49,6 @@ export class MainBoard extends LitElement {
     }
 
     render() {
-        const {name, count} = this;
         return html`
             <head>
                 <meta charset="utf-8">
@@ -74,13 +92,10 @@ export class MainBoard extends LitElement {
                 <div class="bg-body-tertiary p-5 rounded">
                     <h1 class="text-center">Forter QnA</h1>
                     <p class="lead text-center">Ask anything, Answer whatever</p>
-
                     ${this.questions ? this.questions.map((question) =>
                             html`
                                 <question-component .data="${question}"></question-component>`
                     ) : html`<h1>Loading...</h1>`}
-
-
                 </div>
             </main>
 

@@ -16,9 +16,17 @@ export class QuestionComponent extends LitElement {
             <script src="/node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>
             <script src="/node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-            <div class="card question">
+
+            <div class="card text-center question">
+                <div class="card-header">
+                    ${this.data.content}
+                </div>
                 <div class="card-body">
-                    ${this.data.content + ' by ' +  this.data.questionMetadata.askedBy.nickName}
+                    <h5 class="card-title">${' by ' +  this.data.questionMetadata.askedBy.nickName}</h5>
+                    
+                </div>
+                <div class="card-footer text-muted">
+                    ${"2 days ago, " + this.data.answers.length + " answers"}
                 </div>
             </div>
         `;
