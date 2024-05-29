@@ -1,23 +1,10 @@
 import {css} from 'lit';
 
 export default css`
-  :host {
-    //display: flex;
-    //flex-wrap: wrap;
-    //flex-direction: row;
-    //align-items: center;
-    //min-width: 500px;
-    //padding-top: 20px;
-  }
-
-  p {
-    color: blue;
-  }
-
+  
   .flex-container {
     display: flex;
     flex-wrap: wrap;
-    border-radius: 24px;
     border: solid 1px gray;
     align-content: center;
     margin: 0 18px;
@@ -84,6 +71,16 @@ export default css`
     align-content: center;
     text-align: center;
   }
+
+  .question {
+    flex-basis: 80%;
+    border: solid 4px gray;
+    text-align: center;
+    border-radius: 20px;
+    margin-top: 10px;
+    min-height: 200px;
+  }
+  
   
   .col-9 {
     flex-basis: 90%;
@@ -95,16 +92,4 @@ export default css`
     flex-basis: 100%;
     align-content: center;
     text-align: center;
-  }
-  
-  .container {
-    border-radius: 24px;
-    border: solid 1px gray;
-    display: flex;
-    flex: 1;
-    flex-wrap: wrap;
-    align-content: center;
-    margin: 0 18px;
-    justify-content: center;
-    position: relative;
   }`;

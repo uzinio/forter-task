@@ -39,19 +39,28 @@ export class MainBoard extends LitElement {
     const {name, count} = this;
     return html`
       <div class="flex-container">
-        <div class="col-9" style="background: blue;">
-          <p>Contents of first col</p>
+        <div class="col-1" style="background: white;">
+          <p>Icon</p>
+        </div>
+        <div class="col-2" style="background: darkgoldenrod;">
+          <ask-question-button></ask-question-button>
+        </div>
+        <div class="col-4" style="background: saddlebrown;">
+          <p>Site's Name</p>
+        </div>
+        <div class="col-2" style="background: salmon;">
         </div>
         <div class="col-1" style="background: green;">
           <settings-button></settings-button>
         </div>
+
+
+        ${[1,2,3,1,1,1,1,1].map((num) =>
+            html`<div class="question">
+              <question-component></question-component>
+            </div>`
+        )}
         
-        <div class="col-5" style="background: purple;">
-          <p>Contents of fourth col</p>
-        </div>
-        <div class="col-6" style="background: orange;">
-          <p>Contents of fifth col</p>
-        </div>
       </div>
     `;
   }
