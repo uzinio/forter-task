@@ -9,9 +9,13 @@ export class QuestionComponent extends LitElement {
 
     render() {
         return html`
-            <div>
-                <p>Question</p>
-                <answer-question-button></answer-question-button>
+            <script src="/node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>
+            <script src="/node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+            <div class="card">
+                <div class="card-body">
+                    This is some text within a card body.
+                </div>
             </div>
         `;
     }

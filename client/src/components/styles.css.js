@@ -2,6 +2,11 @@ import {css} from 'lit';
 
 export default css`
   
+  body {
+    min-height: 75rem;
+    padding-top: 4.5rem;
+  }
+  
   .flex-container {
     display: flex;
     flex-wrap: wrap;

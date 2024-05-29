@@ -11,6 +11,7 @@
     "lit"
   ],
   "dependencies": {
+    "@webcomponents/webcomponentsjs": "^2.8.0",
     "lit": "^2.2.4"
   },
   "devDependencies": {
@@ -20,7 +21,6 @@
     "@rollup/plugin-replace": "^4.0.0",
     "@web/dev-server": "^0.1.31",
     "@web/dev-server-legacy": "^1.0.0",
-    "@webcomponents/webcomponentsjs": "^2.6.0",
     "lit-analyzer": "^1.2.1",
     "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
