@@ -57,23 +57,23 @@ export class AnswerQuestionCard extends LitElement {
             <div class="card border-info bg-information mb-12" style="margin-top: 10px; background-color: white">
                 <div class="card-header text-left">
                     <div class="float-left">
-                        Offer your Answer
+                        Answer Whatever
                     </div>
                     <date class="float-right">
                         <button type="button" class="btn btn-success" @click="${this.onSend}">
-                            Send
+                            Answer
                         </button>
                     </date>
                 </div>
                 <div class="card-body">
                     <div class="input-group">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">Blaa blaa blaaa I know everything...</span>
+                            <span class="input-group-text">Your Answer</span>
                         </div>
                         <input type="text"
                                .value=${this.answerQuestionInput}
                                @input=${this.handleAnswerQuestionInputChange}
-                               style="min-width: 700px; min-height: 60px;">
+                               style="min-width: 80%; min-height: 60px;">
                     </div>
                 </div>
             </div>

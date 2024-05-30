@@ -8,7 +8,8 @@ export class QuestionComponent extends LitElement {
     static get properties() {
         return {
             data: {type: questionType},
-            userInfo: {type: userInfoType}
+            userInfo: {type: userInfoType},
+            styleClass: {type: String}
         };
     }
 
@@ -21,7 +22,7 @@ export class QuestionComponent extends LitElement {
             <script src="/node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 
-            <div class="card text-center question">
+            <div class="card text-center ${this.styleClass}">
                 <div class="card-header">
                     <div class="container">
                         <div class="row">

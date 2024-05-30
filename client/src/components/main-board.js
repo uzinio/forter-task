@@ -8,7 +8,8 @@ export class MainBoard extends LitElement {
         return {
             questions: {type: [questionType]},
             userInfo: {type: userInfoType},
-            nickNameInput: {type: String}
+            nickNameInput: {type: String},
+            questionInput: {type: String},
         };
     }
 
@@ -21,10 +22,13 @@ export class MainBoard extends LitElement {
         });
         this.socket.on('new-connection', (_data) => {
             this.questions = _data.questions;
+            this.questions = this.questions.map(q => {
+                const newQuestion = {...q, score: 1, styleClass: "question"};
+                return newQuestion;
+            });
         });
         this.socket.on('question-created', (createdQuestion) => {
             this.questions.push(createdQuestion);
-            this.gotUpdate = true;
         });
         this.socket.on('question-updated', (updatedQuestion) => {
             const filteredQuestions = this.questions.filter(q => q.questionMetadata.id !== updatedQuestion.questionMetadata.id);
@@ -38,6 +42,7 @@ export class MainBoard extends LitElement {
             this.userInfo = undefined;
         }
         this.nickNameInput = '';
+        this.questionInput = '';
     }
 
     static styles = [style];
@@ -55,7 +60,11 @@ export class MainBoard extends LitElement {
         this.nickNameInput = event.target.value;
     }
 
-    async onSend(event) {
+    handleQuestionInputChange(event) {
+        this.questionInput = event.target.value;
+    }
+
+    async onUpdateNickname(event) {
         event.preventDefault();
         try {
             const existingUserResponse = await fetch(`http://localhost:3000/user-info/${this.nickNameInput}`);
@@ -93,10 +102,24 @@ export class MainBoard extends LitElement {
         }
     }
 
+    async onAskQuestion(event) {
+        event.preventDefault();
+        this.questions = [this.questions[0], this.questions[1]];
+    }
+
+    sortQuestions(questions) {
+        return questions.sort((a, b) => {
+            if (a.score > b.score) {
+                return -1;
+            }
+            return a.questionMetadata.created > b.questionMetadata.created ? -1 : 1;
+        });
+    }
+
     render() {
-        const {questions : currentQuestion} = this;
-        const questions = currentQuestion || [];
-        const sorted = questions.sort((a, b) => a.questionMetadata.created > b.questionMetadata.created ? -1 : 1);
+        const {questions: currentQuestions} = this;
+        const questions = currentQuestions || [];
+        const sorted = this.sortQuestions(questions);
         return html`
             <head>
                 <meta charset="utf-8">
@@ -111,66 +134,95 @@ export class MainBoard extends LitElement {
             </head>
             <body>
 
+            <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+                <div class="container-fluid">
+                    <div class="navbar-collapse" id="navbarCollapse">
+                        <div class="container" style="min-width: 100%">
+                            <div class="row">
+                                <div class="col-3">
+                                    <form class="d-flex" role="search">
+                                        <input
+                                                class="form-control me-2"
+                                                type="text"
+                                                placeholder=${(this.userInfo && this.userInfo.nickName) ? this.userInfo.nickName : 'nick name'}
+                                                .value=${this.nickNameInput}
+                                                @input=${this.handleNickNameInputChange}
+                                                style="max-width: 60%">
+                                        <button type="button" class="btn btn-primary" @click="${this.onUpdateNickname}">
+                                            Log In
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="col-7"></div>
+                                <div class="col-2">
+                                    ${this.userInfo ?
+                                            html`
+                                                <div class="container">
+                                                    <div class="row float-right">
+                                                        <div class="col-sm">
+                                                            <span class="badge badge-success">Connected</span>
+                                                        </div>
+                                                        <div class="col-sm">
+                                                            <p style="color: white">${this.userInfo.nickName}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ` :
+                                            html`
+                                                <div class="container">
+                                                    <div class="row float-right">
+                                                        <div class="col-sm">
+                                                            <span class="badge badge-danger">Not Connected</span>
+                                                        </div>
+                                                        <div class="col-sm">
 
-            <div class="container my-nav">
-                <div class="row">
-
-                    <form class="d-flex" role="search">
-                        <div class="col-sm">
-                            <input class="form-control" type="text" placeholder="nick name" .value=${this.nickNameInput}
-                                   aria-label="Search" @input=${this.handleNickNameInputChange}>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `
+                                    }
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-sm">
-                            <button type="button" class="btn btn-primary" @click="${this.onSend}">
-                                Update
-                            </button>
-                        </div>
-                    </form>
-
-                    <div class="col-lg text-right">
-                        ${this.userInfo ?
-                                html`
-                                    <div class="container">
-                                        <div class="row float-right">
-                                            <div class="col-sm">
-                                                <span class="badge badge-success">Connected</span>      
-                                            </div>
-                                            <div class="col-sm">
-                                                <p>${this.userInfo.nickName}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ` :
-                                html`
-                                    <div class="container">
-                                        <div class="row float-right">
-                                            <div class="col-sm">
-                                                <span class="badge badge-danger">Not Connected</span>
-                                            </div>
-                                            <div class="col-sm">
-                                                
-                                            </div>
-                                        </div>
-                                    </div>
-                                `
-                        }
-                    </div>
-                </div>
-            </div>
-
+            </nav>
 
             <main class="container">
                 <div class="bg-body-tertiary p-5 rounded">
                     <h1 class="text-center">Forter QnA</h1>
-                    <p class="lead text-center">Ask anything, Answer whatever</p>
-                    ${sorted ? sorted.map((question) =>
-                            html`
-                                <question-component .data="${question}"
-                                                    .userInfo="${this.userInfo}"></question-component>`
-                    ) : html`<h1>Loading...</h1>`}
+                    <p class="lead text-center">Ask Anything, Answer Whatever</p>
+                    <div style="padding: 10px;">
+                        <div class="card border-info bg-information mb-12"
+                             style="margin-top: 10px; background-color: white">
+                            <div class="card-header text-left">
+                                <div class="float-left">
+                                    Ask Anything
+                                </div>
+                                <date class="float-right">
+                                    <button type="button" class="btn btn-success" @click="${this.onAskQuestion}">
+                                        Ask
+                                    </button>
+                                </date>
+                            </div>
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <input type="text"
+                                           .value=${this.questionInput}
+                                           @input=${this.handleQuestionInputChange}
+                                           style="min-width: 700px; min-height: 60px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        ${sorted ? sorted.map((question) =>
+                                html`
+                                    <question-component .data="${question}" .userInfo="${this.userInfo}"
+                                                        .styleClass=${question.styleClass}>
+                                    </question-component>`
+                        ) : html`<h1>Loading...</h1>`}
+                    </div>
                 </div>
             </main>
-
             </body>
         `;
     }

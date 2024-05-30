@@ -15,6 +15,15 @@ export default css`
     min-height: 200px;
   }
 
+  .question-suggested {
+    border: solid 4px green;
+    text-align: center;
+    border-radius: 20px;
+    margin-top: 10px;
+    min-height: 200px;
+  }
+  
+  
   .answers-container {
     max-height: 300px;
     overflow-y: auto;
