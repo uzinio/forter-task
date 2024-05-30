@@ -14,7 +14,8 @@ export const suggestSimilarQuestionsHandler = (questionsIndexClient: QuestionsIn
                 const filtered = suggestions.filter(filterById);
                 if (filtered) {
                     const url = `https://localhost:8000/questions/${filtered[0].getQuestionMetadata.getId}`;
-                    await questionsIndexClient.answerQuestion(new Answer(crypto.randomUUID(), question.getQuestionMetadata, new User("bot"), `I think this question was already asked here ${url}`))
+                    const nowMillisUTC = new Date().valueOf();
+                    await questionsIndexClient.answerQuestion(new Answer(crypto.randomUUID(), question.getQuestionMetadata, new User("bot"), `I think this question was already asked here ${url}`, nowMillisUTC));
                 }
 
             }

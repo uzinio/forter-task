@@ -17,7 +17,8 @@ export const askQuestion = (questionsIndexClient: QuestionsIndexClient, usersInd
     const questionObj = Question.clone(inputQuestion);
     const nickName = questionObj.getQuestionMetadata.getAskedBy.getNickName;
     const userInfo = await throwIfNotExists<UserInfo>(() => usersIndexClient.getUserInfo(nickName), 'user');
-    const newQuestionMetadata = new QuestionMetadata(crypto.randomUUID(), User.clone(req.body.question.questionMetadata.askedBy))
+    const nowMillisUTC = new Date().valueOf();
+    const newQuestionMetadata = new QuestionMetadata(crypto.randomUUID(), nowMillisUTC, nowMillisUTC, User.clone(req.body.question.questionMetadata.askedBy))
     questionObj.setQuestionMetadata(newQuestionMetadata);
     const question = await questionsIndexClient.askQuestion(Question.clone(questionObj));
     const askQuestionResponse = await suggestSimilarQuestionsHandler(questionsIndexClient)(question, userInfo);
@@ -33,6 +34,8 @@ export const answerQuestion = (questionsIndexClient: QuestionsIndexClient, users
     const questionId = answerObj.getQuestionMetadata.getId;
     await throwIfNotExists<Question>(() => questionsIndexClient.getQuestion(questionId), 'question');
     answerObj.setId(crypto.randomUUID());
+    const nowMillisUTC = new Date().valueOf();
+    answerObj.setCreated(nowMillisUTC);
     const question = await questionsIndexClient.answerQuestion(answerObj);
     io.emit('question-updated', {...question} as any);
     res.send({question});

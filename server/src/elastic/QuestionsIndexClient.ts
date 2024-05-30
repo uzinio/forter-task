@@ -1,4 +1,4 @@
-import {Answer, Question} from "../types";
+import {Answer, Question, QuestionMetadata} from "../types";
 import {ElasticSearchClient} from "./ElasticSearchClient";
 
 const qnaIndexName = 'qna-index';
@@ -34,7 +34,6 @@ export class QuestionsIndexClient extends ElasticSearchClient {
                 }
             }
         });
-        // console.log(searchResults.hits.hits);
         return searchResults.hits.hits.map(hit => Question.clone(hit._source as Question));
     }
 
@@ -50,17 +49,20 @@ export class QuestionsIndexClient extends ElasticSearchClient {
             refresh: true,
             operations: bulkData
         });
-        // console.log(result);
         return question;
     }
 
     public async answerQuestion(answer: Answer): Promise<Question> {
         const question = await this.getQuestion(answer.getQuestionMetadata.getId);
-        // console.log(question);
-        const newAnswers = question.getAnswers || [];
-        newAnswers.push(answer);
-        const newQuestion = new Question(question.getQuestionMetadata, question.getContent, newAnswers);
-        return await this.askQuestion(newQuestion);
+        const nowMillisUTC = new Date().valueOf();
+        const id = question.getQuestionMetadata.getId;
+        const created = question.getQuestionMetadata.getCreated;
+        const askedBy = question.getQuestionMetadata.getAskedBy;
+        const newQuestionMetadata = new QuestionMetadata(id, created, nowMillisUTC, askedBy);
+        question.setQuestionMetadata(newQuestionMetadata);
+        answer.setQuestionMetadata(newQuestionMetadata);
+        question.getAnswers.push(answer);
+        return await this.askQuestion(question);
     }
 
 }

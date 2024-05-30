@@ -26,7 +26,6 @@ export class MainBoard extends LitElement {
         });
         this.socket.on('new-connection', (_data) => {
             this.questions = _data.questions;
-            console.log(this.questions);
             this.gotUpdate = true;
         });
         this.socket.on('question-created', (createdQuestion) => {
@@ -49,6 +48,7 @@ export class MainBoard extends LitElement {
     }
 
     render() {
+        const {questions} = this || [];
         return html`
             <head>
                 <meta charset="utf-8">
@@ -92,7 +92,7 @@ export class MainBoard extends LitElement {
                 <div class="bg-body-tertiary p-5 rounded">
                     <h1 class="text-center">Forter QnA</h1>
                     <p class="lead text-center">Ask anything, Answer whatever</p>
-                    ${this.questions ? this.questions.map((question) =>
+                    ${questions ? questions.sort(a => 1 - a.created).map((question) =>
                             html`
                                 <question-component .data="${question}"></question-component>`
                     ) : html`<h1>Loading...</h1>`}
