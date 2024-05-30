@@ -1,26 +1,21 @@
 import {LitElement, html} from 'lit';
 import style from './styles.css.js';
-import {questionType} from "../types/index.js";
+import {questionType, userInfoType} from "../types/index.js";
 import {icons} from "./icons.js";
+import {extractDateString} from "./common.js";
 
 export class QuestionComponent extends LitElement {
     static get properties() {
         return {
             data: {type: questionType},
+            userInfo: {type: userInfoType}
         };
     }
 
     static styles = [style];
 
-    extractDateString(ms) {
-        const createdDate = new Date(ms);
-        return createdDate.toLocaleDateString() + ',' + createdDate.toLocaleTimeString();
-    }
-
     render() {
-        const createdDateString = this.extractDateString(this.data.questionMetadata.created);
-        const updateDateString = this.extractDateString(this.data.questionMetadata.updated);
-
+        const createdDateString = extractDateString(this.data.questionMetadata.created);
         return html`
             <script src="/node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>
             <script src="/node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
@@ -28,35 +23,39 @@ export class QuestionComponent extends LitElement {
 
             <div class="card text-center question">
                 <div class="card-header">
-                    <div class="float-left">
-                        ${icons.patchQuestion}
+                    <div class="container">
+                        <div class="row">
+                            <div class="col text-right">
+                                ${icons.personArmsUp}
+                                ${this.data.questionMetadata.askedBy.nickName}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                ${this.data.content}
+                            </div>
+                        </div>
                     </div>
                     
-                    <div>
-                        ${this.data.content}
-                    </div>
-                    <div class="float-right">
-                        ${icons.personArmsUp}
-                        ${this.data.questionMetadata.askedBy.nickName}
-                    </div>
-
+                    
                 </div>
+
+                <answer-question-card .data="${this.data}" .userInfo="${this.userInfo}"></answer-question-card>
+                
                 <div class="card-body answers-container">
-                    ${this.data.answers.map((answer) =>
+                    ${this.data.answers.sort(a => 1 - a.created).map((answer) =>
                             html`
                                 <answer-component .data="${answer}"></answer-component>`
                     )}
                 </div>
                 <div class="card-footer text-center">
                     <div class="float-left">
-                        <span class="badge badge-pill badge-primary">Asked</span>
-                        ${createdDateString}
-                        
-                        ${createdDateString === updateDateString ? '' : html`
-                            <span class="badge badge-pill badge-secondary">Updated</span>
-                            ${updateDateString}
-                        `}
-                        
+                        <div class="float-left">
+                            ${icons.patchQuestion}
+                        </div>
+                        <date>
+                            ${createdDateString}
+                        </date>
                         
                     </div>
                     <div class="float-right">

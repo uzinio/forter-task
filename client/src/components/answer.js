@@ -2,6 +2,7 @@ import {html, LitElement} from 'lit';
 import style from './styles.css.js';
 import {answerType} from "../types/index.js";
 import {icons} from "./icons.js";
+import {extractDateString} from "./common.js";
 
 export class AnswerComponent extends LitElement {
     static get properties() {
@@ -12,13 +13,8 @@ export class AnswerComponent extends LitElement {
 
     static styles = [style];
 
-    extractDateString(ms) {
-        const createdDate = new Date(ms);
-        return createdDate.toLocaleDateString() + ',' + createdDate.toLocaleTimeString();
-    }
-
     render() {
-        const createdDateString = this.extractDateString(this.data.created);
+        const createdDateString = extractDateString(this.data.created);
         const answeredBy = this.data.answeredBy.nickName;
         return html`
             <script src="/node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>
@@ -28,12 +24,12 @@ export class AnswerComponent extends LitElement {
                 <div class="card-header text-left">
                     <div class="float-left">
                         ${icons.personRaisedHands}
-                        ${this.data.answeredBy.nickName}
+                        ${answeredBy}
                     </div>
-                    <div class="float-right">
+                    <date class="float-right">
                         ${createdDateString}
                         ${icons.alarmFill}
-                    </div>
+                    </date>
                 </div>
                 <div class="card-body">
                     <p class="card-text">${this.data.content}</p>

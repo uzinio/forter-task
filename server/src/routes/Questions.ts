@@ -27,6 +27,8 @@ export const askQuestion = (questionsIndexClient: QuestionsIndexClient, usersInd
 };
 
 export const answerQuestion = (questionsIndexClient: QuestionsIndexClient, usersIndexClient: UsersIndexClient, io: Server) => async (req: Request, res: Response) => {
+    console.log('req.body');
+    console.log(req.body);
     const {answer}: { answer: Answer } = req.body;
     const answerObj = Answer.clone(answer);
     const nickName = answerObj.getAnsweredBy.getNickName;

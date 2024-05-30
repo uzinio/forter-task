@@ -1,13 +1,12 @@
-import express, {Express} from "express";
+import express from "express";
 import httpServer from 'http';
 import dotenv from "dotenv";
 import {addUserInfo, answerQuestion, askQuestion, getUserInfo, queryQuestions, search, updateUserInfo} from "./routes";
 import {errorHandlingMiddleware} from "./middleware";
 import "express-async-errors";
 import {initializeElasticSearchClients} from "./elastic";
-
-const cors = require('cors');
 import {Server} from 'socket.io';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -18,8 +17,9 @@ const jsonParser = bodyParser.json();
 
 const app = express();
 
-app.use(jsonParser);
 app.use(cors());
+app.use(jsonParser);
+
 const http = httpServer.createServer(app);
 
 const server = http.listen(port, () => {
@@ -29,8 +29,7 @@ const server = http.listen(port, () => {
 const io = new Server(http, {
     cors: {
         origin: "*",
-        methods: ["GET", "POST"],
-        credentials: true
+        methods: ["GET", "POST"]
     }
 });
 
@@ -46,6 +45,7 @@ app.post("/user-info", addUserInfo(usersIndexClient));
 app.patch("/user-info", updateUserInfo(usersIndexClient));
 
 app.use(errorHandlingMiddleware);
+
 
 export const closeServer = () => {
     console.log('Closing server')

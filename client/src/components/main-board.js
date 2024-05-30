@@ -1,13 +1,15 @@
 import {html, LitElement} from 'lit';
 import style from './styles.css.js';
 import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
-import {questionType} from "../types/index.js";
+import {questionType, userInfoType} from "../types/index.js";
 
 export class MainBoard extends LitElement {
     static get properties() {
         return {
             questions: {type: [questionType]},
-            gotUpdate: Boolean,
+            gotUpdate: {type: Boolean},
+            userInfo: {type: userInfoType},
+            nickNameInput: {type: String}
         };
     }
 
@@ -38,13 +40,64 @@ export class MainBoard extends LitElement {
             this.questions = filteredQuestions;
             this.gotUpdate = true;
         });
+
+        try {
+            this.userInfo = JSON.parse(this.getCookie());
+        } catch (err) {
+            this.userInfo = undefined;
+        }
+
     }
 
     static styles = [style];
 
+    getCookie() {
+        return document.cookie;
+    }
 
-    onButtonClick() {
-        console.log('Here');
+    setCookie(value) {
+        const stringify = JSON.stringify(value);
+        document.cookie = stringify;
+    }
+
+    handleNickNameInputChange(event) {
+        this.nickNameInput = event.target.value;
+    }
+
+    async onSend() {
+        try {
+            const existingUserResponse = await fetch(`http://localhost:3000/user-info/${this.nickNameInput}`);
+            const {userInfo} = await existingUserResponse.json();
+            if (userInfo) {
+                this.setCookie(userInfo);
+                try {
+                    this.userInfo = JSON.parse(this.getCookie());
+                    this.gotUpdate = true;
+                } catch (err) {
+                    this.userInfo = undefined;
+                }
+                return;
+            }
+
+            const response = await fetch("http://localhost:3000/user-info", {
+                method: "POST",
+                body: JSON.stringify({user: {nickName: this.nickNameInput}}),
+                headers: {
+                    "Content-Type": "application/json; charset=UTF-8"
+                }
+            });
+            const {userInfo: createdUserInfo} = await response.json();
+            this.setCookie(createdUserInfo);
+            try {
+                this.userInfo = JSON.parse(this.getCookie());
+                this.gotUpdate = true;
+            } catch (err) {
+                this.userInfo = undefined;
+            }
+
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     render() {
@@ -62,31 +115,29 @@ export class MainBoard extends LitElement {
 
             </head>
             <body>
-            <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-                <div class="container-fluid">
-                    <div class="collapse navbar-collapse" id="navbarCollapse">
-                        <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                            <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="#">Home</a>
-                            </li>
-                            <li class="nav-item">
-                                <form class="d-flex" role="search">
-                                    <input class="form-control me-2" type="search" placeholder="Search"
-                                           aria-label="Search">
-                                    <button class="btn btn-outline-success" type="submit"
-                                            @click="${this.onButtonClick}">Search
-                                    </button>
-                                </form>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="#">Settings</a>
-                            </li>
-                        </ul>
-                        <!-- search button and box-->
 
+
+            <div class="container my-nav">
+                <div class="row">
+
+                    <form class="d-flex" role="search">
+                        <div class="col-sm">
+                            <input class="form-control" type="search" placeholder="nick name"
+                                   aria-label="Search" @input=${this.handleNickNameInputChange}>
+                        </div>
+                        <div class="col-sm">
+                            <button type="button" class="btn btn-success" @click="${this.onSend}">
+                                Update
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="col-lg text-right">
+                        ${this.userInfo ? `Hi ${this.userInfo.nickName}` : ''}
                     </div>
                 </div>
-            </nav>
+            </div>
+
 
             <main class="container">
                 <div class="bg-body-tertiary p-5 rounded">
@@ -94,7 +145,7 @@ export class MainBoard extends LitElement {
                     <p class="lead text-center">Ask anything, Answer whatever</p>
                     ${questions ? questions.sort(a => 1 - a.created).map((question) =>
                             html`
-                                <question-component .data="${question}"></question-component>`
+                                <question-component .data="${question}" .userInfo="${this.userInfo}"></question-component>`
                     ) : html`<h1>Loading...</h1>`}
                 </div>
             </main>

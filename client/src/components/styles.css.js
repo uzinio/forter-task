@@ -19,4 +19,17 @@ export default css`
     max-height: 300px;
     overflow-y: auto;
   }
+  
+  date {
+    font-size: 12px;
+    padding: 4px;
+  }
+  
+  .my-nav {
+    min-height: 20%;
+    min-width: 100%;
+    //position: fixed;
+    border: solid 4px gray;
+  }
+  
 `;
