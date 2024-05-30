@@ -10,9 +10,9 @@ const nonExistingUserNickName = "non-existing-user-nickName"
 
 export const Fixtures = {
     question: {
-        valid: new Question(new QuestionMetadata(questionId, new User(nickName)), content, []),
-        invalidUserDoesNotExist: new Question(new QuestionMetadata(questionId, new User(nonExistingUserNickName)), content, []),
-        invalidMessageDoesNotExist: new Question(new QuestionMetadata("non-existing-question-id", new User(nickName)), content, []),
+        valid: new Question(new QuestionMetadata(questionId, 0, 0, new User(nickName)), content, []),
+        invalidUserDoesNotExist: new Question(new QuestionMetadata(questionId, 0, 0, new User(nonExistingUserNickName)), content, []),
+        invalidMessageDoesNotExist: new Question(new QuestionMetadata("non-existing-question-id", 0, 0, new User(nickName)), content, []),
     },
     user: {
         valid: new UserInfo(nickName, firstName, lastName, defaultPreferences)
