@@ -1,6 +1,7 @@
 import {html, LitElement} from 'lit';
 import style from './styles.css.js';
 import {questionType, userInfoType} from "../types/index.js";
+import {answerQuestion} from "../services/index.js";
 
 export class AnswerQuestionCard extends LitElement {
     static get properties() {
@@ -24,22 +25,11 @@ export class AnswerQuestionCard extends LitElement {
         delete answer.answers;
 
         try {
-            const response = await fetch("http://localhost:3000/answer-question", {
-                method: "POST",
-                body: JSON.stringify({answer}),
-                headers: {
-                    "Content-Type": "application/json; charset=UTF-8"
-                }
-            });
+            await answerQuestion(answer);
         } catch (err) {
             console.error(err);
         }
         this.answerQuestionInput = '';
-    }
-
-    propertyChangedCallback(event) {
-        console.log('here');
-        console.log(event);
     }
 
     handleAnswerQuestionInputChange(event) {

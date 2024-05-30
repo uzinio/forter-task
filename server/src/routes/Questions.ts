@@ -2,7 +2,6 @@ import {Request, Response} from "express";
 import {Answer, Question, QuestionMetadata, RouteException, User, UserInfo} from "../types";
 import {QuestionsIndexClient, UsersIndexClient} from "../elastic";
 import crypto from "crypto";
-import {suggestSimilarQuestionsHandler} from "../elastic/handlers/";
 import {throwIfNotExists} from "./Common";
 import {Server} from "socket.io";
 
@@ -15,19 +14,16 @@ export const askQuestion = (questionsIndexClient: QuestionsIndexClient, usersInd
     const {question: inputQuestion}: { question: Question } = req.body;
     const questionObj = Question.clone(inputQuestion);
     const nickName = questionObj.getQuestionMetadata.getAskedBy.getNickName;
-    const userInfo = await throwIfNotExists<UserInfo>(() => usersIndexClient.getUserInfo(nickName), 'user');
+    await throwIfNotExists<UserInfo>(() => usersIndexClient.getUserInfo(nickName), 'user');
     const nowMillisUTC = new Date().valueOf();
     const newQuestionMetadata = new QuestionMetadata(crypto.randomUUID(), nowMillisUTC, nowMillisUTC, User.clone(req.body.question.questionMetadata.askedBy))
     questionObj.setQuestionMetadata(newQuestionMetadata);
     const question = await questionsIndexClient.askQuestion(Question.clone(questionObj));
-    const askQuestionResponse = await suggestSimilarQuestionsHandler(questionsIndexClient)(question, userInfo);
     io.emit('question-created', {...question} as any);
-    res.send({askQuestionResponse});
+    res.send({question});
 };
 
 export const answerQuestion = (questionsIndexClient: QuestionsIndexClient, usersIndexClient: UsersIndexClient, io: Server) => async (req: Request, res: Response) => {
-    console.log('req.body');
-    console.log(req.body);
     const {answer}: { answer: Answer } = req.body;
     const answerObj = Answer.clone(answer);
     const nickName = answerObj.getAnsweredBy.getNickName;
@@ -44,7 +40,7 @@ export const answerQuestion = (questionsIndexClient: QuestionsIndexClient, users
 
 export const search = (elasticSearchClient: QuestionsIndexClient) => async (req: Request, res: Response) => {
     const {term}: { term: string } = req.body;
-    const relatedQuestions: Question[] = await elasticSearchClient.search(term);
+    const relatedQuestions = await elasticSearchClient.search(term);
     res.send({relatedQuestions});
 };
 

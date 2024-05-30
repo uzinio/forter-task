@@ -2,11 +2,12 @@ import {html, LitElement} from 'lit';
 import style from './styles.css.js';
 import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 import {questionType, userInfoType} from "../types/index.js";
+import {createUserInfo, getUserInfo} from "../services/index.js";
 
 export class MainBoard extends LitElement {
     static get properties() {
         return {
-            questions: {type: [questionType]},
+            questions: {type: [{question: {type: questionType, score: {type: Number}}}]},
             userInfo: {type: userInfoType},
             nickNameInput: {type: String},
             questionInput: {type: String},
@@ -21,18 +22,21 @@ export class MainBoard extends LitElement {
             }
         });
         this.socket.on('new-connection', (_data) => {
-            this.questions = _data.questions;
-            this.questions = this.questions.map(q => {
-                const newQuestion = {...q, score: 1, styleClass: "question"};
-                return newQuestion;
+            console.log('new-connection');
+            const _questions = _data.questions;
+            this.questions = _questions.map(q => {
+                return {question: q, score: 1, styleClass: "question"};
             });
         });
         this.socket.on('question-created', (createdQuestion) => {
-            this.questions.push(createdQuestion);
+            console.log('question-created');
+            this.questions.push({question: createdQuestion, score: 1, styleClass: "question"});
+            this.requestUpdate();
         });
         this.socket.on('question-updated', (updatedQuestion) => {
-            const filteredQuestions = this.questions.filter(q => q.questionMetadata.id !== updatedQuestion.questionMetadata.id);
-            filteredQuestions.push(updatedQuestion);
+            console.log('question-updated');
+            const filteredQuestions = this.questions.filter(q => q.question.questionMetadata.id !== updatedQuestion.questionMetadata.id);
+            filteredQuestions.push({question: updatedQuestion, score: 1, styleClass: "question"});
             this.questions = filteredQuestions;
         });
 
@@ -67,8 +71,7 @@ export class MainBoard extends LitElement {
     async onUpdateNickname(event) {
         event.preventDefault();
         try {
-            const existingUserResponse = await fetch(`http://localhost:3000/user-info/${this.nickNameInput}`);
-            const {userInfo} = await existingUserResponse.json();
+            const userInfo = await getUserInfo(this.nickNameInput);
             if (userInfo) {
                 this.setCookie(userInfo);
                 try {
@@ -81,14 +84,7 @@ export class MainBoard extends LitElement {
                 return;
             }
 
-            const response = await fetch("http://localhost:3000/user-info", {
-                method: "POST",
-                body: JSON.stringify({user: {nickName: this.nickNameInput}}),
-                headers: {
-                    "Content-Type": "application/json; charset=UTF-8"
-                }
-            });
-            const {userInfo: createdUserInfo} = await response.json();
+            const createdUserInfo = await createUserInfo(this.nickNameInput);
             this.setCookie(createdUserInfo);
             try {
                 this.userInfo = JSON.parse(this.getCookie());
@@ -112,7 +108,7 @@ export class MainBoard extends LitElement {
             if (a.score > b.score) {
                 return -1;
             }
-            return a.questionMetadata.created > b.questionMetadata.created ? -1 : 1;
+            return a.question.questionMetadata.created > b.question.questionMetadata.created ? -1 : 1;
         });
     }
 
@@ -214,10 +210,10 @@ export class MainBoard extends LitElement {
                         </div>
                     </div>
                     <div>
-                        ${sorted ? sorted.map((question) =>
+                        ${sorted ? sorted.map((q) =>
                                 html`
-                                    <question-component .data="${question}" .userInfo="${this.userInfo}"
-                                                        .styleClass=${question.styleClass}>
+                                    <question-component .data="${q.question}" .userInfo="${this.userInfo}"
+                                                        .styleClass=${q.styleClass}>
                                     </question-component>`
                         ) : html`<h1>Loading...</h1>`}
                     </div>

@@ -22,7 +22,7 @@ export class QuestionsIndexClient extends ElasticSearchClient {
         return searchResult.hits.hits.map(hit => Question.clone(hit._source as Question));
     }
 
-    public async search(term: string): Promise<Question[]> {
+    public async search(term: string): Promise<{ question: Question, score: number }[]> {
         const searchResults = await this.client.search({
             index: qnaIndexName,
             query: {
@@ -34,7 +34,9 @@ export class QuestionsIndexClient extends ElasticSearchClient {
                 }
             }
         });
-        return searchResults.hits.hits.map(hit => Question.clone(hit._source as Question));
+        return searchResults.hits.hits.map(hit => {
+            return {question: Question.clone(hit._source as Question), score: hit._score || 0};
+        });
     }
 
     public async askQuestion(question: Question): Promise<Question> {
@@ -45,7 +47,7 @@ export class QuestionsIndexClient extends ElasticSearchClient {
                 _id: question.getQuestionMetadata.getId
             }
         }, question];
-        const result = await this.client.bulk({
+        await this.client.bulk({
             refresh: true,
             operations: bulkData
         });
