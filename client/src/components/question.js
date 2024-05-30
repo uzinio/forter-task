@@ -36,14 +36,14 @@ export class QuestionComponent extends LitElement {
                             </div>
                         </div>
                     </div>
-                    
-                    
+
+
                 </div>
 
                 <answer-question-card .data="${this.data}" .userInfo="${this.userInfo}"></answer-question-card>
-                
+
                 <div class="card-body answers-container">
-                    ${this.data.answers.sort(a => 1 - a.created).map((answer) =>
+                    ${this.data.answers.sort((a, b) => a.created > b.created ? -1 : 1).map((answer) =>
                             html`
                                 <answer-component .data="${answer}"></answer-component>`
                     )}
@@ -56,7 +56,7 @@ export class QuestionComponent extends LitElement {
                         <date>
                             ${createdDateString}
                         </date>
-                        
+
                     </div>
                     <div class="float-right">
                         ${`Answers: ${this.data.answers.length}`}

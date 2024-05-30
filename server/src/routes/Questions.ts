@@ -8,7 +8,6 @@ import {Server} from "socket.io";
 
 export const queryQuestions = (elasticSearchClient: QuestionsIndexClient) => async (req: Request, res: Response) => {
     const questions: Question[] = await elasticSearchClient.queryQuestions();
-    // console.log(questions);
     res.send({questions});
 };
 

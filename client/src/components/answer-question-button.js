@@ -16,7 +16,6 @@ export class AnswerQuestionButton extends LitElement {
     static styles = [style];
 
     onButtonClick() {
-        console.log('Here');
     }
 
     render() {

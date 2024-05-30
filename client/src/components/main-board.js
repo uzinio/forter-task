@@ -7,16 +7,9 @@ export class MainBoard extends LitElement {
     static get properties() {
         return {
             questions: {type: [questionType]},
-            gotUpdate: {type: Boolean},
             userInfo: {type: userInfoType},
             nickNameInput: {type: String}
         };
-    }
-
-    shouldUpdate(changedProps) {
-        const currentVal = this.gotUpdate;
-        this.gotUpdate = false;
-        return currentVal;
     }
 
     constructor() {
@@ -28,7 +21,6 @@ export class MainBoard extends LitElement {
         });
         this.socket.on('new-connection', (_data) => {
             this.questions = _data.questions;
-            this.gotUpdate = true;
         });
         this.socket.on('question-created', (createdQuestion) => {
             this.questions.push(createdQuestion);
@@ -38,7 +30,6 @@ export class MainBoard extends LitElement {
             const filteredQuestions = this.questions.filter(q => q.questionMetadata.id !== updatedQuestion.questionMetadata.id);
             filteredQuestions.push(updatedQuestion);
             this.questions = filteredQuestions;
-            this.gotUpdate = true;
         });
 
         try {
@@ -46,7 +37,7 @@ export class MainBoard extends LitElement {
         } catch (err) {
             this.userInfo = undefined;
         }
-
+        this.nickNameInput = '';
     }
 
     static styles = [style];
@@ -64,7 +55,8 @@ export class MainBoard extends LitElement {
         this.nickNameInput = event.target.value;
     }
 
-    async onSend() {
+    async onSend(event) {
+        event.preventDefault();
         try {
             const existingUserResponse = await fetch(`http://localhost:3000/user-info/${this.nickNameInput}`);
             const {userInfo} = await existingUserResponse.json();
@@ -72,9 +64,10 @@ export class MainBoard extends LitElement {
                 this.setCookie(userInfo);
                 try {
                     this.userInfo = JSON.parse(this.getCookie());
-                    this.gotUpdate = true;
                 } catch (err) {
                     this.userInfo = undefined;
+                } finally {
+                    this.nickNameInput = '';
                 }
                 return;
             }
@@ -90,18 +83,20 @@ export class MainBoard extends LitElement {
             this.setCookie(createdUserInfo);
             try {
                 this.userInfo = JSON.parse(this.getCookie());
-                this.gotUpdate = true;
             } catch (err) {
                 this.userInfo = undefined;
+            } finally {
+                this.nickNameInput = '';
             }
-
         } catch (err) {
             console.error(err);
         }
     }
 
     render() {
-        const {questions} = this || [];
+        const {questions : currentQuestion} = this;
+        const questions = currentQuestion || [];
+        const sorted = questions.sort((a, b) => a.questionMetadata.created > b.questionMetadata.created ? -1 : 1);
         return html`
             <head>
                 <meta charset="utf-8">
@@ -122,18 +117,43 @@ export class MainBoard extends LitElement {
 
                     <form class="d-flex" role="search">
                         <div class="col-sm">
-                            <input class="form-control" type="search" placeholder="nick name"
+                            <input class="form-control" type="text" placeholder="nick name" .value=${this.nickNameInput}
                                    aria-label="Search" @input=${this.handleNickNameInputChange}>
                         </div>
                         <div class="col-sm">
-                            <button type="button" class="btn btn-success" @click="${this.onSend}">
+                            <button type="button" class="btn btn-primary" @click="${this.onSend}">
                                 Update
                             </button>
                         </div>
                     </form>
 
                     <div class="col-lg text-right">
-                        ${this.userInfo ? `Hi ${this.userInfo.nickName}` : ''}
+                        ${this.userInfo ?
+                                html`
+                                    <div class="container">
+                                        <div class="row float-right">
+                                            <div class="col-sm">
+                                                <span class="badge badge-success">Connected</span>      
+                                            </div>
+                                            <div class="col-sm">
+                                                <p>${this.userInfo.nickName}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ` :
+                                html`
+                                    <div class="container">
+                                        <div class="row float-right">
+                                            <div class="col-sm">
+                                                <span class="badge badge-danger">Not Connected</span>
+                                            </div>
+                                            <div class="col-sm">
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                `
+                        }
                     </div>
                 </div>
             </div>
@@ -143,9 +163,10 @@ export class MainBoard extends LitElement {
                 <div class="bg-body-tertiary p-5 rounded">
                     <h1 class="text-center">Forter QnA</h1>
                     <p class="lead text-center">Ask anything, Answer whatever</p>
-                    ${questions ? questions.sort(a => 1 - a.created).map((question) =>
+                    ${sorted ? sorted.map((question) =>
                             html`
-                                <question-component .data="${question}" .userInfo="${this.userInfo}"></question-component>`
+                                <question-component .data="${question}"
+                                                    .userInfo="${this.userInfo}"></question-component>`
                     ) : html`<h1>Loading...</h1>`}
                 </div>
             </main>

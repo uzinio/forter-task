@@ -13,15 +13,15 @@ export class AnswerQuestionCard extends LitElement {
 
     constructor() {
         super();
+        this.answerQuestionInput = '';
     }
 
-    async onSend() {
-        console.log(this.userInfo);
+    async onSend(event) {
+        event.preventDefault();
         const answer = this.data;
         answer.content = this.answerQuestionInput;
         answer.answeredBy = {nickName: this.userInfo.nickName};
         delete answer.answers;
-        console.log(answer);
 
         try {
             const response = await fetch("http://localhost:3000/answer-question", {
@@ -34,10 +34,15 @@ export class AnswerQuestionCard extends LitElement {
         } catch (err) {
             console.error(err);
         }
+        this.answerQuestionInput = '';
+    }
+
+    propertyChangedCallback(event) {
+        console.log('here');
+        console.log(event);
     }
 
     handleAnswerQuestionInputChange(event) {
-        console.log(event.target.value);
         this.answerQuestionInput = event.target.value;
     }
 
@@ -66,7 +71,7 @@ export class AnswerQuestionCard extends LitElement {
                             <span class="input-group-text">Blaa blaa blaaa I know everything...</span>
                         </div>
                         <input type="text"
-                               value=${this.answerQuestionInput}
+                               .value=${this.answerQuestionInput}
                                @input=${this.handleAnswerQuestionInputChange}
                                style="min-width: 700px; min-height: 60px;">
                     </div>
