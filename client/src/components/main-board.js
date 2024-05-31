@@ -2,7 +2,7 @@ import {html, LitElement} from 'lit';
 import style from './styles.css.js';
 import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 import {questionType, userInfoType} from "../types/index.js";
-import {createUserInfo, getUserInfo, search} from "../services/index.js";
+import {askQuestion, createUserInfo, getUserInfo, search} from "../services/index.js";
 
 export class MainBoard extends LitElement {
     static get properties() {
@@ -11,8 +11,10 @@ export class MainBoard extends LitElement {
             userInfo: {type: userInfoType},
             nickNameInput: {type: String},
             questionInput: {type: String},
+            isSuggesting: {type: Boolean},
+            numOfSuggestions: {type: Number},
         };
-    }
+    };
 
     constructor() {
         super();
@@ -31,21 +33,25 @@ export class MainBoard extends LitElement {
         this.socket.on('question-created', async (createdQuestion) => {
             console.log('question-created');
             this.questions.push({question: createdQuestion, score: 1, styleClass: "question"});
-            this.requestUpdate();
-            if(this.questionInput) {
+            if (this.isSuggesting) {
                 await this.handleSuggestions();
             }
+            this.requestUpdate();
         });
         this.socket.on('question-updated', async (updatedQuestion) => {
             console.log('question-updated');
-            console.log(this.questions.find(q => q.question.questionMetadata.id === updatedQuestion.questionMetadata.id));
             const lastScore = this.questions.find(q => q.question.questionMetadata.id === updatedQuestion.questionMetadata.id).score;
             const filteredQuestions = this.questions.filter(q => q.question.questionMetadata.id !== updatedQuestion.questionMetadata.id);
-            filteredQuestions.push({question: updatedQuestion, score: lastScore, styleClass: lastScore > 0 ? "question-suggested" : "question"});
+            filteredQuestions.push({
+                question: updatedQuestion,
+                score: lastScore,
+                styleClass: lastScore > 0 ? "question-suggested" : "question"
+            });
             this.questions = filteredQuestions;
-            if(this.questionInput) {
+            if (this.isSuggesting) {
                 await this.handleSuggestions();
             }
+            this.requestUpdate();
         });
 
         try {
@@ -55,6 +61,8 @@ export class MainBoard extends LitElement {
         }
         this.nickNameInput = '';
         this.questionInput = '';
+        this.isSuggesting = false;
+        this.numOfSuggestions = 0;
     }
 
     static styles = [style];
@@ -73,7 +81,9 @@ export class MainBoard extends LitElement {
     }
 
     async handleSuggestions() {
+        this.isSuggesting = true;
         const suggestions = await search(this.questionInput);
+        this.numOfSuggestions = suggestions.length;
         const idsAndScore = new Map(suggestions.map((questionWithScore) => {
             const {question, score} = questionWithScore;
             return [question.questionMetadata.id, score];
@@ -81,14 +91,16 @@ export class MainBoard extends LitElement {
 
         this.questions = this.questions.map(questionWithScoreAndStyle => {
             const questionId = questionWithScoreAndStyle.question.questionMetadata.id;
-            if(idsAndScore.get(questionId)) {
-                return {question: questionWithScoreAndStyle.question, score: idsAndScore.get(questionId), styleClass: "question-suggested"}
+            if (idsAndScore.get(questionId)) {
+                return {
+                    question: questionWithScoreAndStyle.question,
+                    score: idsAndScore.get(questionId),
+                    styleClass: "question-suggested"
+                }
             } else {
                 return {question: questionWithScoreAndStyle.question, score: 0, styleClass: "question"};
             }
         });
-        console.log('after');
-        console.log(this.questions);
     }
 
 
@@ -130,19 +142,36 @@ export class MainBoard extends LitElement {
 
     async onAskQuestion(event) {
         event.preventDefault();
+        this.isSuggesting = false;
+        this.numOfSuggestions = 0;
+        const content = this.questionInput;
+        this.questionInput = '';
+        this.questions = this.questions.map(q => {
+            return {...q, score: 0, styleClass: "question"}
+        });
+        await askQuestion(this.userInfo.nickName, content);
+        this.requestUpdate();
     }
 
     sortQuestions(questions) {
         return questions.sort((a, b) => {
-            console.log(a);
             if (a.score > b.score) {
                 return -1;
-            } else if(a.score < b.score) {
+            } else if (a.score < b.score) {
                 return 1;
             }
             return a.question.questionMetadata.created > b.question.questionMetadata.created ? -1 : 1;
         });
     }
+
+    createSuggestionBanner() {
+        return this.numOfSuggestions > 0
+            ? html`
+                    <div class="alert alert-primary" role="alert">We have ${this.numOfSuggestions} suggestions for you
+                        before publishing a new question
+                    </div>`
+            : html``;
+    };
 
     render() {
         const {questions: currentQuestions} = this;
@@ -241,6 +270,9 @@ export class MainBoard extends LitElement {
                             </div>
                         </div>
                     </div>
+                    
+                    ${this.isSuggesting ? this.createSuggestionBanner() : ''}
+                    
                     <div>
                         ${sorted ? sorted.map((q) =>
                                 html`
@@ -254,6 +286,6 @@ export class MainBoard extends LitElement {
             </body>
         `;
     }
-}
+};
 
 window.customElements.define('main-board', MainBoard);
