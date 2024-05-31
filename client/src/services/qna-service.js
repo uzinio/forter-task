@@ -40,12 +40,11 @@ export const search = async (term) => {
 
 export const askQuestion = async (nickName, content) => {
     const question = {questionMetadata: {askedBy: {nickName}}, content};
-    const response = await fetch("http://localhost:3000/ask-question", {
+    await fetch("http://localhost:3000/ask-question", {
         method: "POST",
         body: JSON.stringify({question}),
         headers: {
             "Content-Type": "application/json; charset=UTF-8"
         }
     });
-    const {question: askedQuestion} = await response.json();
 }

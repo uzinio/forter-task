@@ -211,17 +211,12 @@ export class MainBoard extends LitElement {
                                     </form>
                                 </div>
                                 <div class="col-7"></div>
-                                <div class="col-2">
+                                <div class="col-2 d-flex justify-content-end align-items-center">
                                     ${this.userInfo ?
                                             html`
-                                                <div class="container">
-                                                    <div class="row float-right">
-                                                        <div class="col-sm">
-                                                            <span class="badge badge-success">Connected</span>
-                                                        </div>
-                                                        <div class="col-sm">
-                                                            <p style="color: white">${this.userInfo.nickName}</p>
-                                                        </div>
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <span class="badge badge-success">Connected</span>
                                                     </div>
                                                 </div>
                                             ` :
@@ -270,9 +265,9 @@ export class MainBoard extends LitElement {
                             </div>
                         </div>
                     </div>
-                    
+
                     ${this.isSuggesting ? this.createSuggestionBanner() : ''}
-                    
+
                     <div>
                         ${sorted ? sorted.map((q) =>
                                 html`
