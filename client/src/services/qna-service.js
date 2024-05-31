@@ -16,6 +16,16 @@ export const createUserInfo = async (nickName) => {
     return createdUserInfo;
 };
 
+export const updateUserInfo = async (nickName, mode) => {
+    await fetch("http://localhost:3000/user-info", {
+        method: "PATCH",
+        body: JSON.stringify({user: {nickName}, preferences: {offerSimilarQuestion: mode}}),
+        headers: {
+            "Content-Type": "application/json; charset=UTF-8"
+        }
+    });
+};
+
 export const answerQuestion = async (answer) => {
     await fetch("http://localhost:3000/answer-question", {
         method: "POST",

@@ -4,6 +4,7 @@ import {QuestionsIndexClient, UsersIndexClient} from "../elastic";
 import crypto from "crypto";
 import {throwIfNotExists} from "./Common";
 import {Server} from "socket.io";
+import {suggestSimilarQuestionsHandler} from "./SuggestSimilarQuestionsHandler";
 
 export const queryQuestions = (elasticSearchClient: QuestionsIndexClient) => async (req: Request, res: Response) => {
     const questions: Question[] = await elasticSearchClient.queryQuestions();
@@ -14,13 +15,14 @@ export const askQuestion = (questionsIndexClient: QuestionsIndexClient, usersInd
     const {question: inputQuestion}: { question: Question } = req.body;
     const questionObj = Question.clone(inputQuestion);
     const nickName = questionObj.getQuestionMetadata.getAskedBy.getNickName;
-    await throwIfNotExists<UserInfo>(() => usersIndexClient.getUserInfo(nickName), 'user');
+    const userInfo = await throwIfNotExists<UserInfo>(() => usersIndexClient.getUserInfo(nickName), 'user');
     const nowMillisUTC = new Date().valueOf();
     const newQuestionMetadata = new QuestionMetadata(crypto.randomUUID(), nowMillisUTC, nowMillisUTC, User.clone(req.body.question.questionMetadata.askedBy))
     questionObj.setQuestionMetadata(newQuestionMetadata);
     const question = await questionsIndexClient.askQuestion(Question.clone(questionObj));
-    io.emit('question-created', {...question} as any);
-    res.send({question});
+    const questionWithSuggestions = await suggestSimilarQuestionsHandler(questionsIndexClient)(question, userInfo);
+    io.emit('question-created', {...questionWithSuggestions} as any);
+    res.send({question: questionWithSuggestions});
 };
 
 export const answerQuestion = (questionsIndexClient: QuestionsIndexClient, usersIndexClient: UsersIndexClient, io: Server) => async (req: Request, res: Response) => {

@@ -41,4 +41,16 @@ export default css`
     border: solid 4px gray;
   }
   
+  .preferences-form {
+    border-color: grey;
+    border-radius: 30px;
+    border-width: thin;
+    border-style: solid;
+    background-color: dodgerblue
+  }
+  
+  .preferences-radio {
+    padding-right: 5px;
+  }
+  
 `;

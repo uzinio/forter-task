@@ -2,7 +2,7 @@ import {html, LitElement} from 'lit';
 import style from './styles.css.js';
 import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 import {questionType, userInfoType} from "../types/index.js";
-import {askQuestion, createUserInfo, getUserInfo, search} from "../services/index.js";
+import {askQuestion, createUserInfo, getUserInfo, search, updateUserInfo} from "../services/index.js";
 
 export class MainBoard extends LitElement {
     static get properties() {
@@ -13,6 +13,7 @@ export class MainBoard extends LitElement {
             questionInput: {type: String},
             isSuggesting: {type: Boolean},
             numOfSuggestions: {type: Number},
+            selectedSuggestionsMode: {type: Number}
         };
     };
 
@@ -56,6 +57,7 @@ export class MainBoard extends LitElement {
 
         try {
             this.userInfo = JSON.parse(this.getCookie());
+            this.selectedSuggestionsMode = this.userInfo.preferences.offerSimilarQuestion;
         } catch (err) {
             this.userInfo = undefined;
         }
@@ -81,6 +83,9 @@ export class MainBoard extends LitElement {
     }
 
     async handleSuggestions() {
+        if (this.selectedSuggestionsMode !== 0) {
+            return;
+        }
         this.isSuggesting = true;
         const suggestions = await search(this.questionInput);
         this.numOfSuggestions = suggestions.length;
@@ -103,7 +108,6 @@ export class MainBoard extends LitElement {
         });
     }
 
-
     async handleQuestionInputChange(event) {
         event.preventDefault();
         this.questionInput = event.target.value;
@@ -118,6 +122,7 @@ export class MainBoard extends LitElement {
                 this.setCookie(userInfo);
                 try {
                     this.userInfo = JSON.parse(this.getCookie());
+                    this.selectedSuggestionsMode = this.userInfo.preferences.offerSimilarQuestion;
                 } catch (err) {
                     this.userInfo = undefined;
                 } finally {
@@ -173,6 +178,13 @@ export class MainBoard extends LitElement {
             : html``;
     };
 
+    async onPreferencesChange(mode) {
+        await updateUserInfo(this.userInfo.nickName, mode);
+        this.selectedSuggestionsMode = mode;
+        this.userInfo = {...this.userInfo, preferences: {...this.userInfo.preferences, offerSimilarQuestion: mode}};
+        this.setCookie(this.userInfo);
+    }
+
     render() {
         const {questions: currentQuestions} = this;
         const questions = currentQuestions || [];
@@ -196,7 +208,7 @@ export class MainBoard extends LitElement {
                     <div class="navbar-collapse" id="navbarCollapse">
                         <div class="container" style="min-width: 100%">
                             <div class="row">
-                                <div class="col-3">
+                                <div class="col-2">
                                     <form class="d-flex" role="search">
                                         <input
                                                 class="form-control me-2"
@@ -210,7 +222,40 @@ export class MainBoard extends LitElement {
                                         </button>
                                     </form>
                                 </div>
-                                <div class="col-7"></div>
+                                <div class="col-2 d-flex preferences-form align-items-center">
+                                    <div class="input-group d-flex justify-content-center align-items-center">
+                                        <div class="form-check preferences-radio">
+                                            <input
+                                                    class="form-check-input"
+                                                    type="radio" name="flexRadioDefault"
+                                                    id="none-mode"
+                                                    @click=${async () => await this.onPreferencesChange(1)}
+                                                    ?checked=${this.selectedSuggestionsMode === 1}>
+                                            <label class="form-check-label">None</label>
+                                        </div>
+                                        <div class="form-check preferences-radio">
+                                            <input
+                                                    class="form-check-input"
+                                                    type="radio"
+                                                    name="flexRadioDefault"
+                                                    id="auto-mode"
+                                                    @click=${async () => await this.onPreferencesChange(2)}
+                                                    ?checked=${this.selectedSuggestionsMode === 2}>
+                                            <label class="form-check-label">Auto</label>
+                                        </div>
+                                        <div class="form-check preferences-radio">
+                                            <input
+                                                    class="form-check-input"
+                                                    type="radio"
+                                                    name="flexRadioDefault"
+                                                    id="filtered-mode"
+                                                    @click=${async () => await this.onPreferencesChange(0)}
+                                                    ?checked=${this.selectedSuggestionsMode === 0}>
+                                            <label class="form-check-label">Suggested</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6"></div>
                                 <div class="col-2 d-flex justify-content-end align-items-center">
                                     ${this.userInfo ?
                                             html`
