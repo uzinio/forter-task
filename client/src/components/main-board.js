@@ -28,16 +28,24 @@ export class MainBoard extends LitElement {
                 return {question: q, score: 0, styleClass: "question"};
             });
         });
-        this.socket.on('question-created', (createdQuestion) => {
+        this.socket.on('question-created', async (createdQuestion) => {
             console.log('question-created');
             this.questions.push({question: createdQuestion, score: 1, styleClass: "question"});
             this.requestUpdate();
+            if(this.questionInput) {
+                await this.handleSuggestions();
+            }
         });
-        this.socket.on('question-updated', (updatedQuestion) => {
+        this.socket.on('question-updated', async (updatedQuestion) => {
             console.log('question-updated');
+            console.log(this.questions.find(q => q.question.questionMetadata.id === updatedQuestion.questionMetadata.id));
+            const lastScore = this.questions.find(q => q.question.questionMetadata.id === updatedQuestion.questionMetadata.id).score;
             const filteredQuestions = this.questions.filter(q => q.question.questionMetadata.id !== updatedQuestion.questionMetadata.id);
-            filteredQuestions.push({question: updatedQuestion, score: 1, styleClass: "question"});
+            filteredQuestions.push({question: updatedQuestion, score: lastScore, styleClass: lastScore > 0 ? "question-suggested" : "question"});
             this.questions = filteredQuestions;
+            if(this.questionInput) {
+                await this.handleSuggestions();
+            }
         });
 
         try {
@@ -64,9 +72,7 @@ export class MainBoard extends LitElement {
         this.nickNameInput = event.target.value;
     }
 
-    async handleQuestionInputChange(event) {
-        event.preventDefault();
-        this.questionInput = event.target.value;
+    async handleSuggestions() {
         const suggestions = await search(this.questionInput);
         const idsAndScore = new Map(suggestions.map((questionWithScore) => {
             const {question, score} = questionWithScore;
@@ -83,6 +89,13 @@ export class MainBoard extends LitElement {
         });
         console.log('after');
         console.log(this.questions);
+    }
+
+
+    async handleQuestionInputChange(event) {
+        event.preventDefault();
+        this.questionInput = event.target.value;
+        await this.handleSuggestions();
     }
 
     async onUpdateNickname(event) {
@@ -121,8 +134,11 @@ export class MainBoard extends LitElement {
 
     sortQuestions(questions) {
         return questions.sort((a, b) => {
+            console.log(a);
             if (a.score > b.score) {
                 return -1;
+            } else if(a.score < b.score) {
+                return 1;
             }
             return a.question.questionMetadata.created > b.question.questionMetadata.created ? -1 : 1;
         });
