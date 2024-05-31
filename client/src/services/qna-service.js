@@ -25,3 +25,15 @@ export const answerQuestion = async (answer) => {
         }
     })
 };
+
+export const search = async (term) => {
+    const response = await fetch("http://localhost:3000/search", {
+        method: "POST",
+        body: JSON.stringify({term}),
+        headers: {
+            "Content-Type": "application/json; charset=UTF-8"
+        }
+    });
+    const {relatedQuestions} = await response.json();
+    return relatedQuestions;
+}

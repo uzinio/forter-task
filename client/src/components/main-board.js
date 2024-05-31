@@ -2,7 +2,7 @@ import {html, LitElement} from 'lit';
 import style from './styles.css.js';
 import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 import {questionType, userInfoType} from "../types/index.js";
-import {createUserInfo, getUserInfo} from "../services/index.js";
+import {createUserInfo, getUserInfo, search} from "../services/index.js";
 
 export class MainBoard extends LitElement {
     static get properties() {
@@ -25,7 +25,7 @@ export class MainBoard extends LitElement {
             console.log('new-connection');
             const _questions = _data.questions;
             this.questions = _questions.map(q => {
-                return {question: q, score: 1, styleClass: "question"};
+                return {question: q, score: 0, styleClass: "question"};
             });
         });
         this.socket.on('question-created', (createdQuestion) => {
@@ -64,8 +64,25 @@ export class MainBoard extends LitElement {
         this.nickNameInput = event.target.value;
     }
 
-    handleQuestionInputChange(event) {
+    async handleQuestionInputChange(event) {
+        event.preventDefault();
         this.questionInput = event.target.value;
+        const suggestions = await search(this.questionInput);
+        const idsAndScore = new Map(suggestions.map((questionWithScore) => {
+            const {question, score} = questionWithScore;
+            return [question.questionMetadata.id, score];
+        }));
+
+        this.questions = this.questions.map(questionWithScoreAndStyle => {
+            const questionId = questionWithScoreAndStyle.question.questionMetadata.id;
+            if(idsAndScore.get(questionId)) {
+                return {question: questionWithScoreAndStyle.question, score: idsAndScore.get(questionId), styleClass: "question-suggested"}
+            } else {
+                return {question: questionWithScoreAndStyle.question, score: 0, styleClass: "question"};
+            }
+        });
+        console.log('after');
+        console.log(this.questions);
     }
 
     async onUpdateNickname(event) {
@@ -100,7 +117,6 @@ export class MainBoard extends LitElement {
 
     async onAskQuestion(event) {
         event.preventDefault();
-        this.questions = [this.questions[0], this.questions[1]];
     }
 
     sortQuestions(questions) {
