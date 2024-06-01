@@ -196,3 +196,12 @@ I would want to have a dedicated element that deals with updating the userInfo i
 Problem is that I couldn't make the FW to rerender the element after such a change. After a long struggle, I decided to put it inline (among other stuff).
 - TypeScript is not my language hence the not-perfect conventions, such as the use in clone methods instead of reasonable constructors and other aspects of the coding were affected as well.
 - I couldn't create a Lit project using TypeScript for some reason hence using two languages in the same project.
+
+## What is missing that I am not aware of?
+Many many many many things
+
+## Take aways and Conclusions
+I highly appreciate the opportunity to interview for Forter. 
+Even more - I am much happier with tasks as this one, where I can express my abilities, than interviews with questions of the mode:  
+`Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays`
+so thank you for that...
