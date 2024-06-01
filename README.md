@@ -196,6 +196,7 @@ I would want to have a dedicated element that deals with updating the userInfo i
 Problem is that I couldn't make the FW to rerender the element after such a change. After a long struggle, I decided to put it inline (among other stuff).
 - TypeScript is not my language hence the not-perfect conventions, such as the use in clone methods instead of reasonable constructors and other aspects of the coding were affected as well.
 - I couldn't create a Lit project using TypeScript for some reason hence using two languages in the same project.
+- Server pagination - Server currently returns all questions in `queryQuestions` endpoint. A proper `pagination` mechanism is required to handle many questions responses as well as query language (`Lucin` can be facilitated in this scenario for that)
 
 ## What is missing that I am not aware of?
 Many many many many things
