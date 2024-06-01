@@ -23,7 +23,7 @@ export class AnswerComponent extends LitElement {
             <div class="card border-info bg-light mb-12" style="margin-top: 10px;">
                 <div class="card-header text-left">
                     <div class="float-left">
-                        ${icons.personRaisedHands}
+                        ${answeredBy === "forter-bot" ? icons.bot : icons.personRaisedHands}
                         ${answeredBy}
                     </div>
                     <date class="float-right">

@@ -17,7 +17,7 @@ export const suggestSimilarQuestionsHandler = (questionsIndexClient: QuestionsIn
                     return a.question.getQuestionMetadata.getCreated > b.question.getQuestionMetadata.getCreated ? -1 : 1;
                 });
                 const nowMillisUTC = new Date().valueOf();
-                const content = `I think this question looks similar: ${sorted[0].question.getContent.slice(0, 10)}...`;
+                const content = `I think this question looks similar: ${sorted[0].question.getContent.slice(0, 40)}...`;
                 return await questionsIndexClient.answerQuestion(new Answer(crypto.randomUUID(), question.getQuestionMetadata, new User("forter-bot"), content, nowMillisUTC));
             }
         }
