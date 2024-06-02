@@ -61,6 +61,7 @@ export class AnswerQuestionCard extends LitElement {
                             <span class="input-group-text">Your Answer</span>
                         </div>
                         <input type="text"
+                               placeholder="Your answer here..."
                                .value=${this.answerQuestionInput}
                                @input=${this.handleAnswerQuestionInputChange}
                                style="min-width: 80%; min-height: 60px;">

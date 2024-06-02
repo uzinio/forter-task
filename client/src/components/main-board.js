@@ -303,6 +303,7 @@ export class MainBoard extends LitElement {
                             <div class="card-body">
                                 <div class="input-group">
                                     <input type="text"
+                                           placeholder="Your question here..."
                                            .value=${this.questionInput}
                                            @input=${this.handleQuestionInputChange}
                                            style="min-width: 700px; min-height: 60px;">
